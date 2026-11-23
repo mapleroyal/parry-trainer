@@ -84,6 +84,7 @@ export default function registerIntervalProbe(): void {
         starts.set(number, times)
       } else if (number === 1 && caught !== undefined) {
         if (!observedStun || stunned || now - caughtAt < 1) { finish(false, 'opponent wound up during its parry stun'); return }
+        if (player.pawn()?.entity === caught) { finish(false, 'reused the pawn with fading parry effects'); return }
         finish(session.heavy === totalHeavies && session.parries === 1,
           'six-second and repeated one-second native heavy windups, per-opponent scheduling, score and parry recovery')
         return

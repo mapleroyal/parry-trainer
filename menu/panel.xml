@@ -249,7 +249,6 @@
         </Panel>
         <Label id="ParryTrainerPresetHint" class="PTGoalHint" text="" />
         <Label id="ParryTrainerDifficultyFeedback" text="" class="PTDifficultyFeedback" />
-        <Button id="ParryTrainerPresetApply" class="PTPrimary" onactivate="ParryTrainerApplyPreset()" enabled="false" hittest="false" hittestchildren="false" acceptsfocus="true"><Label text="Apply" /></Button>
       </Panel>
       <Panel id="ParryTrainerPageCharacter" class="PTPage">
         <Panel id="ParryTrainerProfileMain" class="PTProfileSection">
@@ -516,6 +515,7 @@
       </Panel>
       <Panel id="ParryTrainerFooter">
         <Label id="ParryTrainerPhase" text="" hittest="false" />
+        <Button id="ParryTrainerPresetApply" class="PTPrimary" onactivate="ParryTrainerApplyPreset()" enabled="false" hittest="false" hittestchildren="false" acceptsfocus="true"><Label text="Apply" /></Button>
         <Button class="PTPrimary" onactivate="ParryTrainerRunAction()" acceptsfocus="true" id="ParryTrainerBegin">
           <Label text="Begin session" id="ParryTrainerBeginLabel" />
         </Button>

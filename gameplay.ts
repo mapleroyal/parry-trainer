@@ -8,7 +8,7 @@ import {
 import { apply, arena, set } from 'modlock/console'
 import {
   billyParticleResources, caughtInParry, clearCaughtOpponents, clearMeleeParticles, drawLungeDust, lungeDust, meleeCuesEnabled, parriedOrbit, parriedSparks,
-  placeStunnedOpponent, prepareAttackerCues, recenterStunContact, setStockCueVisibility, stockCuesVisible,
+  hasParryEffects, placeStunnedOpponent, prepareAttackerCues, recenterStunContact, setStockCueVisibility, stockCuesVisible,
   updateParriedEffects, type ClientAssets, type LungeTrail,
 } from './particles'
 import { approachOffset, sampleDistance } from './attack-distance'
@@ -319,6 +319,9 @@ function advance(attacker: Attacker, target: Pawn, assets: ClientAssets): void {
       if (now - cadence.stunned.caughtAt < 0.1 || modifierState(cadence.stunned.entity, 'MODIFIER_STATE_STUNNED')) return
       cadence.stunned = undefined
     }
+    // The native stun gates both pawns. Its fading visuals belong only to the
+    // pawn that was parried, so the reserve can take the next scheduled punch.
+    if (assets === 'stock' && hasParryEffects(pawn.entity)) return
     const weapon = attacker.trail.weapon
     const recovery = readField(weapon, 'CCitadel_Ability_Melee_Base', 'm_flNextAttackAllowedTime', 'float32')
     if ((typeof recovery === 'number' && now < recovery) ||
@@ -524,6 +527,8 @@ export function startGameplay(assets: ClientAssets = 'private', lifecycle?: {
     a.cadence.stunned = { entity: result.attacker, caughtAt: now }
     caughtInParry(result.attacker, now)
     if (assets === 'stock') {
+      a.cadence.reserveNeeded = true
+      checkBotsAt = 0
       const attacker = a.bot.pawn(), defender = trainee?.pawn()
       if (attacker && defender) placeStunnedOpponent(a.bot, attacker, defender, practiceOrigin)
       applyStockCues(a, false)

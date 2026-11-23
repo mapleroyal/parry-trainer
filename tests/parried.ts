@@ -12,7 +12,7 @@ export default function registerParriedProbe(assets: ClientAssets = 'private'): 
   let cooldownEnd = 0, parryEntity = 0
   let hits = 0, heavies = 0, lights = 0, catches = 0
   let subject: Player | undefined
-  let phase = -1, caughtAt = -1, nextPress = 0, sawStun = false
+  let phase = -1, caughtAt = -1, caughtEntity = 0, nextPress = 0, sawStun = false
   const observedEffects = new Set<string>()
   let checkRemoval = false, enableAfterRecovery = false, reportedModifier = false
   const expected = [false, true, false]
@@ -34,6 +34,7 @@ export default function registerParriedProbe(assets: ClientAssets = 'private'): 
   onParry(result => {
     if (!active || phase < 0 || caughtAt >= 0 || result.player.slot !== subject?.slot) return
     catches++
+    caughtEntity = result.attacker
     caughtAt = now
     sawStun = false
     observedEffects.clear()
@@ -54,10 +55,9 @@ export default function registerParriedProbe(assets: ClientAssets = 'private'): 
       if (subject) testSubject(subject, { x: 512, y: -384, z: 8 })
       return
     }
-    const opponent = players().find(c => c.name === 'Trainer opponent 1')?.player
-    const target = opponent?.pawn()
+    const opponents = players().filter(c => c.name === 'Trainer opponent 1' || c.name === 'Trainer opponent 1 reserve')
     const ability = subject.abilities().find(a => a.name === parry)
-    if (!ability || !opponent || !target?.hero || !subject.pawn()?.hero) return
+    if (!ability || !opponents.length || !subject.pawn()?.hero) return
     const markers = findEntities('info_particle_system').flatMap(entity => {
       const name = readField(entity, 'CParticleSystem', 'm_iszEffectName', 'string')
       if (typeof name === 'string' && victimEffects.has(name) &&
@@ -99,20 +99,22 @@ export default function registerParriedProbe(assets: ClientAssets = 'private'): 
     if (enableAfterRecovery) {
       // Switching on while the prior opponent is still parried would correctly
       // show their current stun. Wait so the next native catch is independent.
-      if (modifierState(target.entity, 'MODIFIER_STATE_STUNNED')) return
+      if (modifierState(caughtEntity, 'MODIFIER_STATE_STUNNED')) return
       setParriedEffects(true)
       enableAfterRecovery = false
     }
-    const weapon = opponent.abilities().find(a => a.slot === 22)
-    if (!weapon) return
     if (caughtAt < 0) {
       if (markers.length) { finish(false, 'marker before successful parry'); return }
-      const state = readField(weapon.entity, 'CCitadel_Ability_HoldMelee', 'm_eCurrentAttackState', 'uint32')
-      if ((state === 2 || state === 3 || state === 5) && now >= nextPress) {
-        if (subject.press(Buttons.parry)) nextPress = now + 0.9
+      for (const { player } of opponents) {
+        const weapon = player.abilities().find(a => a.slot === 22)
+        const state = weapon && readField(weapon.entity, 'CCitadel_Ability_HoldMelee', 'm_eCurrentAttackState', 'uint32')
+        if ((state === 2 || state === 3 || state === 5) && now >= nextPress && subject.press(Buttons.parry)) nextPress = now + 0.9
       }
       return
     }
+    const opponent = opponents.find(c => c.player.pawn()?.entity === caughtEntity)?.player
+    const target = opponent?.pawn(), weapon = opponent?.abilities().find(a => a.slot === 22)
+    if (!target || !weapon) return
     sawStun ||= modifierState(target.entity, 'MODIFIER_STATE_STUNNED') === true
     if (sawStun && !reportedModifier) {
       const statuses = modifiers(target.entity).filter(m => /parr|stun/i.test(m.name + m.className))

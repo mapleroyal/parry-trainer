@@ -159,15 +159,24 @@ const parryStun = 'citadel_ability_melee_parry/modifier_citadel_parried_stun'
 let showParried = false
 interface CaughtOpponent {
   graceUntil: number
+  fadeUntil?: number
   contact?: Vector
   sparks?: WorldObject
   orbit?: WorldObject
 }
 const caught = new Map<number, CaughtOpponent>()
+// Particles in melee_parry_debuff_body and its burst can live for two seconds
+// after emission ends. Allow a little time for the client to receive the stop.
+const stunParticleTail = 2.25
+
+export function hasParryEffects(entity: number): boolean {
+  return caught.has(entity)
+}
 
 // The stun switch takes priority once the defender catches the attack.
 export function stockCuesVisible(entity: number, windingUp: boolean): boolean {
-  return caught.has(entity) ? showParried : windingUp && show
+  const victim = caught.get(entity)
+  return victim ? showParried && !victim.contact : windingUp && show
 }
 
 export function setStockCueVisibility(entity: number, visible: boolean): void {
@@ -195,6 +204,7 @@ export function caughtInParry(entity: number, now: number): void {
   // The event and the first replicated stun update can straddle a server tick.
   const victim = caught.get(entity) ?? { graceUntil: 0 }
   victim.graceUntil = now + 0.1
+  victim.fadeUntil = undefined
   caught.set(entity, victim)
 }
 
@@ -205,7 +215,7 @@ export function placeStunnedOpponent(bot: Player, pawn: Pawn, trainee: Pawn, are
   const victim = caught.get(pawn.entity)
   if (!victim) return
   const zero = { x: 0, y: 0, z: 0 }
-  if (showParried) {
+  if (showParried && (!victim.contact || victim.fadeUntil === undefined)) {
     if (victim.contact && bot.teleport(victim.contact, pawn.eyeAngles, zero)) victim.contact = undefined
     return
   }
@@ -234,8 +244,12 @@ export function clearCaughtOpponents(): void {
 
 export function updateParriedEffects(now: number, assets: ClientAssets): void {
   for (const [entity, victim] of caught) {
-    if (readModifierField(entity, parryStun, 'CBaseModifier', 'm_bDisabled', 'bool') !== false) {
+    if (victim.fadeUntil !== undefined || readModifierField(entity, parryStun, 'CBaseModifier', 'm_bDisabled', 'bool') !== false) {
       if (now < victim.graceUntil) continue
+      if (assets === 'stock') {
+        victim.fadeUntil ??= now + stunParticleTail
+        if (now < victim.fadeUntil) continue
+      }
       removeStunGraphics(victim, false)
       caught.delete(entity)
       continue

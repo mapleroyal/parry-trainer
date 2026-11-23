@@ -192,8 +192,9 @@
 .PTCurrentLimit { color: #ecebdc; font-family: sans; font-size: 20px; }
 #ParryTrainerControls.InSession #ParryTrainerCurrentLimit { visibility: visible; }
 #ParryTrainerControls.InSession #ParryTrainerLimitControls { visibility: collapse; }
-#ParryTrainerFooter { width: 100%; margin-top: 16px; }
-#ParryTrainerPhase { horizontal-align: left; vertical-align: center; color: #b9c8bf; font-family: sans; font-size: 18px; }
+#ParryTrainerFooter { width: 100%; margin-top: 16px; flow-children: right; }
+#ParryTrainerFooter Button { margin-left: 8px; vertical-align: center; }
+#ParryTrainerPhase { width: fill-parent-flow(1); vertical-align: center; color: #b9c8bf; font-family: sans; font-size: 18px; }
 .PTSubAction, .PTPrimary { padding: 7px 14px; border-radius: 3px; }
 .PTSubAction { background-color: #303434; }
 .PTNavSpacer { width: fill-parent-flow(1); }

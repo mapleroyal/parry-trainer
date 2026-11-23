@@ -13,6 +13,30 @@ function ParryTrainerGuardRetailHud(game) {
     function restore(panel, original) {
         if (panel.IsValid() && panel.style.visibility === 'collapse') panel.style.visibility = original;
     }
+    function hide(panel) {
+        if (!panel || !panel.IsValid()) return;
+        var visibility = panel.style.visibility;
+        if (!changed.has(panel) || visibility !== 'collapse') changed.set(panel, visibility || null);
+        if (visibility !== 'collapse') panel.style.visibility = 'collapse';
+    }
+    function watchIndicators(next) {
+        if (next === indicators) return;
+        indicators = next;
+        if (indicators) {
+            // Deadlock adds Stunned to the new impact as its native animation starts.
+            // The class change reaches the parent before the label's first layout and paint.
+            $.RegisterEventHandler('StyleClassesChanged', indicators, function (impact) {
+                if (indicators !== next || impact.paneltype !== 'CitadelHudEventIndicator') return;
+                if (impact.BHasClass('Stunned') && !ParryTrainerPreset.get('parried')) {
+                    hide(impact);
+                } else if (changed.has(impact)) {
+                    var original = changed.get(impact);
+                    changed.delete(impact);
+                    restore(impact, original);
+                }
+            });
+        }
+    }
     function refresh() {
         if (!game.IsValid()) return;
         if (Date.now() - previousRefresh >= 1000) {
@@ -21,7 +45,7 @@ function ParryTrainerGuardRetailHud(game) {
             var gameplay = game.FindChildTraverse('gameplay_hud');
             if (gameplay) panels = panels.concat(gameplay.FindChildrenWithClassTraverse('action_upgrade'));
             units = game.FindChildTraverse('unit_indicators_v2');
-            indicators = game.FindChildTraverse('HudEventIndicatorsPanel');
+            watchIndicators(game.FindChildTraverse('HudEventIndicatorsPanel'));
             announcements = game.FindChildTraverse('ToastManager');
         }
         var hidden = new Set(panels);
@@ -42,17 +66,13 @@ function ParryTrainerGuardRetailHud(game) {
                 changed.delete(panel);
             }
         });
-        hidden.forEach(function (panel) {
-            if (!panel || !panel.IsValid()) return;
-            var visibility = panel.style.visibility;
-            if (!changed.has(panel) || visibility !== 'collapse') changed.set(panel, visibility || null);
-            if (visibility !== 'collapse') panel.style.visibility = 'collapse';
-        });
+        hidden.forEach(hide);
         timer = $.Schedule(0.1, refresh);
     }
     refresh();
     return function () {
         if (timer !== undefined) $.CancelScheduled(timer);
+        watchIndicators(null);
         changed.forEach(function (original, panel) { restore(panel, original); });
         changed.clear();
     };

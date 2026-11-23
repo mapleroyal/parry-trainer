@@ -596,7 +596,12 @@ test('returning the slider to its current value disables Apply; a new edit hides
 });
 
 test('Begin stays available on other tabs, while an active session can stop from Templates', () => {
+    const xml = fs.readFileSync(path.join(__dirname, 'panel.xml'), 'utf8');
+    const footer = xml.match(/<Panel id="ParryTrainerFooter">([\s\S]*?)<\/Panel>/)[1];
+    assert.match(footer, /id="ParryTrainerPhase"[\s\S]*id="ParryTrainerPresetApply"[\s\S]*id="ParryTrainerBegin"/);
     const css = fs.readFileSync(path.join(__dirname, 'difficulty.css'), 'utf8');
+    assert.match(css, /^#ParryTrainerPresetApply\s*\{[^}]*visibility:\s*collapse/m);
+    assert.match(css, /\.OnPresets #ParryTrainerPresetApply\s*\{[^}]*visibility:\s*visible/);
     assert.match(css, /\.OnPresets #ParryTrainerBegin\s*\{[^}]*visibility:\s*collapse/);
     for (const state of ['TemplateApplied', 'InSession']) {
         assert.match(css, new RegExp('\\.OnPresets\\.' + state + ' #ParryTrainerBegin[^{]*\\{[^}]*visibility:\\s*visible'));
@@ -1656,8 +1661,15 @@ test('native HUD hides the local development frame and restores each panel on un
     const lookup = { unit_indicators_v2: units, HudEventIndicatorsPanel: indicators, damage_impact: damage,
         ModlockUi_modlock: frame, ModlockUi_parry_trainer: trainer };
     const game = { ...panel(), FindChildTraverse: id => lookup[id] };
-    let tick, canceled, enabled = new Set();
-    hud.$ = { Schedule: (_, cb) => { tick = cb; return 1; }, CancelScheduled: id => { canceled = id; } };
+    let tick, canceled, restyled, enabled = new Set();
+    hud.$ = {
+        Schedule: (_, cb) => { tick = cb; return 1; }, CancelScheduled: id => { canceled = id; },
+        RegisterEventHandler(name, parent, cb) {
+            assert.equal(name, 'StyleClassesChanged');
+            assert.equal(parent, indicators);
+            restyled = cb;
+        },
+    };
     hud.ParryTrainerIsActive = () => true;
     hud.ParryTrainerPreset = { get: key => enabled.has(key) };
     const restore = hud.ParryTrainerGuardRetailHud(game);
@@ -1667,6 +1679,16 @@ test('native HUD hides the local development frame and restores each panel on un
     assert.equal(units.style.visibility, 'collapse');
     assert.equal(badge.style.visibility, 'collapse');
     assert.equal(player.style.visibility, undefined);
+    // A new native impact must be hidden on its first style pass, before the next timer tick.
+    const impact = { ...badge, style: {}, paneltype: 'CitadelHudEventIndicator' };
+    const disarmed = { ...player, style: {}, paneltype: 'CitadelHudEventIndicator' };
+    restyled(disarmed);
+    restyled(impact);
+    assert.equal(impact.style.visibility, 'collapse');
+    assert.equal(disarmed.style.visibility, undefined);
+    impact.BHasClass = () => false;
+    restyled(impact);
+    assert.equal(impact.style.visibility, null);
     const replacement = panel();
     lookup.ModlockUi_modlock = replacement;
     time += 1000;
@@ -1676,10 +1698,24 @@ test('native HUD hides the local development frame and restores each panel on un
     assert.equal(frame.style.visibility, null);
     assert.equal(badge.style.visibility, null);
     assert.equal(units.style.visibility, null);
+    const shown = { ...badge, style: {}, paneltype: 'CitadelHudEventIndicator' };
+    restyled(shown);
+    assert.equal(shown.style.visibility, undefined);
     restore();
+    enabled.clear();
+    restyled(shown);
+    assert.equal(shown.style.visibility, undefined);
     assert.equal(replacement.style.visibility, null);
     assert.equal(damage.style.visibility, 'visible');
     assert.equal(canceled, 1);
+    const stale = restyled;
+    const unloadAgain = hud.ParryTrainerGuardRetailHud(game);
+    stale(shown);
+    assert.equal(shown.style.visibility, undefined);
+    restyled(shown);
+    assert.equal(shown.style.visibility, 'collapse');
+    unloadAgain();
+    assert.equal(shown.style.visibility, null);
 });
 
 test('an offline account disables library writes while Begin, Reset and account reconnect stay available', () => {

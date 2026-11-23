@@ -4,9 +4,9 @@ A solo Deadlock training mode for Windows and Linux. Stand still, run, shoot or 
 
 ## Play
 
-Parry Trainer 0.4.1 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
+Parry Trainer 0.4.2 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
 
-1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.1-hyperline.zip) and extract it into a fresh folder.
+1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.2-hyperline.zip) and extract it into a fresh folder.
 2. Close Deadlock and finish any queued Deadlock update in Steam Downloads. Leave Steam running. The local host and game share files, so applying a patch during practice can disconnect you.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
@@ -122,7 +122,7 @@ To run the HUD and gameplay-state tests with Node 24 or later, use `node --test 
 
 For a dedicated-server check, `bin/hyperline probe-build cues` builds the stock-melee probe in `.runtime/hyperline/probes/cues`. Run the pinned CLI with `modlock play --no-game --watch=false .runtime/hyperline/probes/cues` and look for `PARRY TRAINER PROBE PASS`. The `quiet-melee` probe checks weapon selection and restoration across the playable roster. The `session`, `tracking`, `melee-distance`, `parried`, `respawn` and `hero` probes use the same workflow. Run these engine checks with the game closed.
 
-To check the visuals after a Deadlock update, open the built mod with the stock CLI. Fix the melee distance at maximum, then compare attacks and successful parries with each effects switch off and on. The client draws some particles that a dedicated-server test cannot see.
+To check the visuals after a Deadlock update, open the built mod with the stock CLI. Fix the melee distance at maximum and the interval at one second. Compare each effects switch off and on. Check the first frame of a successful parry for the stun label and the following windup for any lingering glow on the opponent. The client draws some effects that a dedicated-server test cannot see.
 
 To regenerate the committed map and marker assets after editing their source:
 

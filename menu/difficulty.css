@@ -5,7 +5,8 @@
 #ParryTrainerPresetActive { font-size: 17px; color: #b9c5bc; vertical-align: center; }
 .PTPreviewHeading { margin-top: 6px; margin-bottom: 2px; font-size: 19px; }
 .PTSettingLine .PTSettingValue.PTPreviewChanged { color: #ccedab; font-weight: bold; }
-#ParryTrainerPresetApply { margin-top: 6px; }
+#ParryTrainerPresetApply { visibility: collapse; }
+#ParryTrainerControls.OnPresets #ParryTrainerPresetApply { visibility: visible; }
 #ParryTrainerPresetApply:disabled, .PTPreviewSliderRow .PTStepButton:disabled { opacity: 0.45; }
 #ParryTrainerControls.OnPresets #ParryTrainerBegin { visibility: collapse; }
 #ParryTrainerControls.OnPresets.TemplateApplied #ParryTrainerBegin,
