@@ -4,9 +4,9 @@ A solo Deadlock training mode for Windows and Linux. Stand still, run, shoot or 
 
 ## Play
 
-The Hyperline listing is pending publication. You can play the prerelease locally on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
+Parry Trainer 0.4.0 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
 
-1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.0-pre.2-hyperline.zip) and extract it.
+1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.0-hyperline.zip) and extract it.
 2. Close Deadlock and leave Steam running.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
@@ -129,4 +129,6 @@ cargo run --locked --manifest-path map-src/Cargo.toml --bin native-arena -- nati
 cargo run --locked --manifest-path map-src/Cargo.toml --bin range-markers -- native/content/particles
 ```
 
-When ready to share a **tester draft**, a creator with access can run `bin/hyperline draft`. This uploads to Hyperline. Use a one-player lobby for the trainer. Check the rendered arena, the scoreboard and Extra Info bindings, directional audio, opponent effects, the shop, and account saves on Windows and Linux before promoting the tested build. [Hyperline creator access](https://hyperline.gg/creators) · [Publishing and tester drafts](https://paralin.github.io/modlock/reference/publishing)
+The trainer uses scripted Panorama layouts for its menu, scorecard and HUD. Hyperline requires trusted-creator access to publish these layouts. [Modlock client content guide](https://paralin.github.io/modlock/guides/client-content)
+
+With that access, run `bin/hyperline publish` for a regular release or `bin/hyperline draft` for a tester prerelease. After Hyperline accepts the upload, follow the creator dashboard to play a one-player lobby and set the game Live. [Hyperline creator dashboard](https://hyperline.gg/creators) · [Publishing and tester drafts](https://paralin.github.io/modlock/reference/publishing)

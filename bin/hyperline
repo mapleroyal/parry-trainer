@@ -77,7 +77,7 @@ def package(build, manifest):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", nargs="?", choices=("build", "verify", "play", "draft", "probe-build"), default="build")
+    parser.add_argument("action", nargs="?", choices=("build", "verify", "play", "draft", "publish", "probe-build"), default="build")
     parser.add_argument("probe", nargs="?", choices=sorted(p.stem for p in (ROOT / "tests").glob("*.ts")))
     args = parser.parse_args()
     if (args.action == "probe-build") != bool(args.probe):
@@ -93,8 +93,9 @@ def main():
             # with only a local destination. Discard the SDK's standalone wrapper.
             subprocess.run([cli, "publish", "--to", "archive", "--out", tmp, project], env=env, check=True)
             return
-        if args.action == "draft":
-            subprocess.run([cli, "publish", "--to", "hyperline", "--prerelease", project], env=env, check=True)
+        if args.action in ("draft", "publish"):
+            flags = ["--prerelease"] if args.action == "draft" else []
+            subprocess.run([cli, "publish", "--to", "hyperline", *flags, project], env=env, check=True)
             return
         subprocess.run([cli, "build", "--release", project], env=env, check=True)
         if args.action == "play":
