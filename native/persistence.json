@@ -1,0 +1,136 @@
+{
+  "services": [
+    {
+      "name": "persist",
+      "optional": true
+    }
+  ],
+  "persist": [
+    {
+      "name": "trainer",
+      "writers": "WRITERS_PLAYERS",
+      "fields": {
+        "p0": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p1": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p2": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p3": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p4": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p5": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p6": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p7": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p8": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p9": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p10": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p11": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p12": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p13": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p14": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p15": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p16": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p17": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p18": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p19": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p20": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p21": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p22": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p23": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p24": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p25": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p26": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p27": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p28": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        },
+        "p29": {
+          "kind": "KIND_STRING",
+          "maxBytes": 250
+        }
+      }
+    }
+  ]
+}

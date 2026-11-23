@@ -1,0 +1,37 @@
+#ParryTrainerControls.OnCharacter #ParryTrainerPageCharacter { visibility: visible; flow-children: down; }
+.PTProfileSection { width: 100%; flow-children: down; }
+#ParryTrainerProfileSaveForm, #ParryTrainerProfileChoose, #ParryTrainerProfileConfirmation { visibility: collapse; }
+.ProfileSaveForm #ParryTrainerProfileMain, .ProfileChoosing #ParryTrainerProfileMain,
+.ProfileConfirming #ParryTrainerProfileMain, .OnCharacter.ProfileEditing #ParryTrainerFooter { visibility: collapse; }
+.ProfileSaveForm #ParryTrainerProfileSaveForm, .ProfileChoosing #ParryTrainerProfileChoose,
+.ProfileConfirming #ParryTrainerProfileConfirmation { visibility: visible; }
+.PTProfileBar { width: 100%; flow-children: right; }
+#ParryTrainerLibraryNav { margin-bottom: 14px; }
+.PTProfileBar Button { vertical-align: center; margin-right: 5px; }
+.PTLibrarySpacer { width: fill-parent-flow(1); }
+.PTProfileMinor { color: #c4cbc1; font-size: 17px; font-family: sans; }
+.PTBackupPath { font-family: monospace; font-size: 16px; color: #e3e5d8; margin: 9px 0 14px 0; }
+#ParryTrainerProfileNameInput { width: 100%; margin-bottom: 8px; }
+.PTProfileScroll { width: 100%; max-height: 295px; flow-children: down; overflow: squish scroll; }
+.PTProfileRow { width: 100%; padding: 6px 8px; flow-children: right; border-top: 1px solid #3a3e39; }
+.PTProfileName { width: 16%; vertical-align: center; color: #ebece3; font-family: sans; font-size: 19px; }
+.PTProfileSelection { width: fill-parent-flow(1); vertical-align: center; flow-children: down; }
+Button.PTProfileSelection { padding: 5px 8px; }
+Button.PTProfileSelection, .PTProfileOption { background-color: #292d2b; border-radius: 3px; }
+Button.PTProfileSelection:hover, .PTProfileOption:hover { background-color: #3a423d; }
+.PTProfileSelection .PTProfileTitle, .PTProfileOption .PTProfileTitle { color: #e1eadb; font-family: sans; font-size: 19px; }
+.PTProfileSelection .PTProfileMinor, .PTProfileOption .PTProfileMinor { color: #b6c2b6; font-size: 15px; }
+.PTProfileRow .PTSubAction { margin-left: 5px; vertical-align: center; }
+.PTProfileOption { width: 100%; padding: 5px 10px; margin-bottom: 3px; flow-children: down; }
+.PTProfileOption.Selected .PTProfileTitle { color: #cde6cf; font-weight: bold; }
+.PTProfileFormActions { horizontal-align: right; flow-children: right; margin-top: 8px; }
+.PTProfileFormActions Button { margin-left: 6px; }
+#ParryTrainerProfileBack { margin-top: 6px; }
+.PTProfileRunHint, #ParryTrainerProfileFeedback { visibility: collapse; }
+.InSession .PTProfileRunHint, .HasProfileFeedback #ParryTrainerProfileFeedback { visibility: visible; }
+#ParryTrainerProfileFeedback { width: 100%; margin: 6px 0; color: #d1e3cd; }
+#ParryTrainerPageCharacter Button:disabled { opacity: 0.45; }
+
+#ParryTrainerMenu .PTDelete { background-color: #703e3e; }
+#ParryTrainerMenu .PTDelete Label { color: #fff2e9; }
+#ParryTrainerMenu .PTDelete:hover, #ParryTrainerMenu .PTDelete:focus { background-color: #914d48; }

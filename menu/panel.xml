@@ -1,0 +1,535 @@
+<Panel id="ParryTrainerControls" hittest="false" onload="ParryTrainerWatchMenu()">
+  <GlobalClassListener classes="gScoreboardOpen gDetailView gShopOpen gEditingBuilds gItemDraftOpen" />
+  <Panel hittest="false" hittestchildren="false" id="ParryTrainerHud">
+    <Panel id="ParryTrainerHudStats">
+      <Panel class="PTHudColumn">
+        <Label id="ParryTrainerClockCaption" class="PTHudTitle" text="Time elapsed" />
+        <Label id="ParryTrainerClock" class="PTHudStat" text="0:00" />
+        <Label id="ParryTrainerHudRecovery" class="PTHudTitle" text="Respawning · session continues" visible="false" />
+      </Panel>
+      <Panel class="PTHudColumn">
+        <Label class="PTHudTitle" text="Parries" />
+        <Label id="ParryTrainerHudParries" class="PTHudStat" text="0/0 · 0 hits taken" />
+      </Panel>
+      <Panel class="PTHudColumn">
+        <Label id="ParryTrainerHudTroopers" class="PTHudTitle" text="Trooper souls" />
+        <Label id="ParryTrainerHudLaneSouls" class="PTHudStat" text="0 secured · 0 missed" />
+      </Panel>
+      <Panel class="PTHudColumn">
+        <Label id="ParryTrainerHudCamps" class="PTHudTitle" text="Camp souls" />
+        <Label id="ParryTrainerHudCampSouls" class="PTHudStat" text="0 secured · 0 missed" />
+      </Panel>
+      <Panel id="ParryTrainerHudLimit" class="PTHudColumn">
+        <Label id="ParryTrainerHudCaption" class="PTHudTitle" text="Training" />
+        <Panel class="PTHudHelp">
+          <CitadelBinding id="ParryTrainerHudKey" action="Scoreboard" show_single_bind="true" compact="true" />
+          <Label id="ParryTrainerHudText" class="PTHudStat" text="to begin" />
+        </Panel>
+      </Panel>
+    </Panel>
+  </Panel>
+  <Panel hittest="false" hittestchildren="false" id="ParryTrainerCountdown" />
+  <Panel hittest="true" id="ParryTrainerMenu" class="PTCardSurface" oncancel="ParryTrainerDismissMenu()">
+    <Panel id="ParryTrainerSettingsPage">
+      <Panel id="ParryTrainerNav">
+        <Button id="ParryTrainerNavSetup" class="PTNav" onactivate="ParryTrainerOpenTab('Setup')" acceptsfocus="true"><Label text="Session" /></Button>
+        <Button id="ParryTrainerNavHero" class="PTNav" onactivate="ParryTrainerOpenTab('Hero')" acceptsfocus="true"><Label text="My hero" /></Button>
+        <Button id="ParryTrainerNavCombat" class="PTNav" onactivate="ParryTrainerOpenTab('Combat')" acceptsfocus="true"><Label text="Opponents" /></Button>
+        <Button id="ParryTrainerNavCreeps" class="PTNav" onactivate="ParryTrainerOpenTab('Creeps')" acceptsfocus="true"><Label text="Creeps" /></Button>
+        <Button id="ParryTrainerNavCharacter" class="PTNav" onactivate="ParryTrainerOpenTab('Character')" acceptsfocus="true"><Label text="Saved" /></Button>
+        <Button id="ParryTrainerNavPresets" class="PTNav" onactivate="ParryTrainerOpenTab('Presets')" acceptsfocus="true"><Label text="Templates" /></Button>
+        <Button id="ParryTrainerNavScore" class="PTNav" onactivate="ParryTrainerOpenTab('Score')" acceptsfocus="true"><Label text="Score" /></Button>
+        <Panel class="PTNavSpacer" />
+        <Button id="ParryTrainerReset" class="PTSubAction" onactivate="ParryTrainerReset()" acceptsfocus="true"><Label id="ParryTrainerResetLabel" text="Reset" /></Button>
+      </Panel>
+      <Panel id="ParryTrainerPageSetup" class="PTPage">
+        <Panel class="PTColumn PTFirst">
+          <Label text="Finish condition" class="PTHeading" />
+          <Panel id="ParryTrainerLimitControls">
+            <Panel class="PTSegments">
+              <Button class="PTSegment" onactivate="ParryTrainerSetLimit('none')" acceptsfocus="true" id="ParryTrainerLimitnone">
+                <Label text="Unlimited" />
+              </Button>
+              <Button class="PTSegment" onactivate="ParryTrainerSetLimit('timer')" acceptsfocus="true" id="ParryTrainerLimittimer">
+                <Label text="Timer" />
+              </Button>
+              <Button class="PTSegment" onactivate="ParryTrainerSetLimit('goal')" acceptsfocus="true" id="ParryTrainerLimitgoal">
+                <Label text="Goals" />
+              </Button>
+            </Panel>
+            <Panel id="ParryTrainerTimerFields" class="PTLimitFields">
+              <Label text="Duration (m:ss)" class="PTFieldLabel" />
+              <Panel class="PTInputRow">
+                <Button class="PTStepButton" onactivate="ParryTrainerAdjustLimit('timer', -1)" acceptsfocus="true">
+                  <Label text="−" />
+                </Button>
+                <TextEntry id="ParryTrainerLimitInput" class="PTLimitInput" maxchars="9" acceptsfocus="true" ontextentrychange="ParryTrainerEditField('timer')" ontextentrysubmit="ParryTrainerCommitField('timer')" onblur="ParryTrainerCommitField('timer')" />
+                <Button class="PTStepButton" onactivate="ParryTrainerAdjustLimit('timer', 1)" acceptsfocus="true">
+                  <Label text="+" />
+                </Button>
+              </Panel>
+            </Panel>
+            <Panel id="ParryTrainerGoalFields" class="PTLimitFields">
+              <Label text="Successful parries" class="PTFieldLabel" />
+              <Panel class="PTInputRow">
+                <Button class="PTStepButton" onactivate="ParryTrainerAdjustLimit('parries', -1)" acceptsfocus="true">
+                  <Label text="−" />
+                </Button>
+                <TextEntry id="ParryTrainerParryInput" class="PTLimitInput" maxchars="9" acceptsfocus="true" ontextentrychange="ParryTrainerEditField('parries')" ontextentrysubmit="ParryTrainerCommitField('parries')" onblur="ParryTrainerCommitField('parries')" />
+                <Button class="PTStepButton" onactivate="ParryTrainerAdjustLimit('parries', 1)" acceptsfocus="true">
+                  <Label text="+" />
+                </Button>
+              </Panel>
+              <Label text="Net souls secured" class="PTFieldLabel" />
+              <Panel class="PTInputRow">
+                <Button class="PTStepButton" onactivate="ParryTrainerAdjustLimit('souls', -1)" acceptsfocus="true">
+                  <Label text="−" />
+                </Button>
+                <TextEntry id="ParryTrainerSoulInput" class="PTLimitInput" maxchars="9" acceptsfocus="true" ontextentrychange="ParryTrainerEditField('souls')" ontextentrysubmit="ParryTrainerCommitField('souls')" onblur="ParryTrainerCommitField('souls')" />
+                <Button class="PTStepButton" onactivate="ParryTrainerAdjustLimit('souls', 1)" acceptsfocus="true">
+                  <Label text="+" />
+                </Button>
+              </Panel>
+              <Label text="Meet both targets, or set one to 0 to skip it." class="PTGoalHint" />
+            </Panel>
+            <Label id="ParryTrainerLimitError" text="" class="PTError" />
+          </Panel>
+          <Label id="ParryTrainerStartError" class="PTError" text="" />
+          <Label id="ParryTrainerCurrentLimit" text="" class="PTCurrentLimit" />
+          <Label class="PTBetweenSessions PTGoalHint" text="Change finish conditions between sessions." />
+          <Button id="ParryTrainerChooseSource" class="PTSubAction PTMissingSoulSource" onactivate="ParryTrainerChooseSoulSource()" acceptsfocus="true">
+            <Label text="Choose a soul source ›" />
+          </Button>
+        </Panel>
+        <Panel class="PTColumn">
+          <Label text="Loss conditions" class="PTHeading" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('fail_on_death')" acceptsfocus="true" id="ParryTrainerDeathOutcomeChoice">
+            <Label text="Lose on death" />
+            <Label id="ParryTrainerDeathOutcome" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Label id="ParryTrainerDeathHint" text="Any death ends this session." class="PTDeathHint" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('fail_on_hits')" acceptsfocus="true" id="ParryTrainerHitLossChoice">
+            <Label text="Heavy melee hit limit" />
+            <Label id="ParryTrainerHitLoss" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Panel id="ParryTrainerHitLimitFields" class="PTLimitFields">
+            <Label text="Heavy melee hits to lose" class="PTFieldLabel" />
+            <Panel class="PTInputRow">
+              <Button id="ParryTrainerHitLimitMinus" class="PTStepButton" onactivate="ParryTrainerAdjustLimit('hit_limit', -1)" acceptsfocus="true">
+                <Label text="−" />
+              </Button>
+              <TextEntry id="ParryTrainerHitLimitInput" class="PTLimitInput" maxchars="4" acceptsfocus="true" ontextentrychange="ParryTrainerEditField('hit_limit')" ontextentrysubmit="ParryTrainerCommitField('hit_limit')" onblur="ParryTrainerCommitField('hit_limit')" />
+              <Button id="ParryTrainerHitLimitPlus" class="PTStepButton" onactivate="ParryTrainerAdjustLimit('hit_limit', 1)" acceptsfocus="true">
+                <Label text="+" />
+              </Button>
+            </Panel>
+          </Panel>
+          <Label class="PTBetweenSessions PTGoalHint" text="Change the hit limit between sessions." />
+          <Label text="Soul penalties" class="PTHeading PTSubheading" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('penalty_hit')" acceptsfocus="true" id="ParryTrainerPenaltyHitChoice">
+            <Label text="Heavy melee hit taken" />
+            <Label id="ParryTrainerPenaltyHit" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('penalty_unparried')" acceptsfocus="true" id="ParryTrainerPenaltyUnparriedChoice">
+            <Label text="Unparried heavy (even if dodged)" />
+            <Label id="ParryTrainerPenaltyUnparried" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('penalty_whiff')" acceptsfocus="true" id="ParryTrainerPenaltyWhiffChoice">
+            <Label text="Parry catches nothing" />
+            <Label id="ParryTrainerPenaltyWhiff" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Label text="−1 secured soul per enabled event. Penalties can stack." class="PTGoalHint" />
+        </Panel>
+      </Panel>
+      <Panel id="ParryTrainerPagePresets" class="PTPage">
+        <Panel class="ParryTrainerDifficultyRow">
+          <Label id="ParryTrainerPresetActive" text="" />
+          <Panel id="ParryTrainerPreviewIdentity" class="PTPreviewIdentity"><Label class="PTPreviewCaption" text="Preview" /><Label id="ParryTrainerPresetValue" text="Normal · 50" class="PTSliderValue" /></Panel>
+        </Panel>
+        <Panel id="ParryTrainerPresetControl" class="PTPreviewSliderRow">
+          <Button id="ParryTrainerPresetMinus" class="PTStepButton" onactivate="ParryTrainerStepPreset(-1)" acceptsfocus="true"><Label text="−" /></Button>
+          <Slider id="ParryTrainerPreset" class="HorizontalSlider PTSlider" direction="horizontal" min="0" max="1" increment="0.01" acceptsfocus="true" />
+          <Button id="ParryTrainerPresetPlus" class="PTStepButton" onactivate="ParryTrainerStepPreset(1)" acceptsfocus="true"><Label text="+" /></Button>
+        </Panel>
+        <Panel hittest="false" class="ParryTrainerDifficultyRow ParryTrainerDifficultyEnds">
+          <Label text="Easiest" /><Label text="Normal" class="PTSliderMiddle" /><Label text="Hardest" class="ParryTrainerDifficultyRight" />
+        </Panel>
+        <Panel class="PTPresetSections">
+          <Panel class="PTColumn PTFirst">
+            <Label text="Hero and opponents" class="PTHeading PTPreviewHeading" />
+            <Panel class="PTSettingLine">
+              <Label text="Start distance" />
+              <Label id="ParryTrainerSummaryDistance" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel id="ParryTrainerSummaryFavoredRow" class="PTSettingLine">
+              <Label text="Favored distance" />
+              <Label id="ParryTrainerSummaryFavored" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Time between melees" />
+              <Label id="ParryTrainerSummaryInterval" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel id="ParryTrainerSummaryFavoredIntervalRow" class="PTSettingLine">
+              <Label text="Favored interval" />
+              <Label id="ParryTrainerSummaryFavoredInterval" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Opponents" />
+              <Label id="ParryTrainerSummaryOpponents" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Opponent heroes" />
+              <Label id="ParryTrainerSummaryOpponentPicks" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Melee effects" />
+              <Label id="ParryTrainerSummaryEffects" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Opponent stun effects" />
+              <Label id="ParryTrainerSummaryParried" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Ability cooldowns" />
+              <Label id="ParryTrainerSummaryCooldown" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Fast stamina regen" />
+              <Label id="ParryTrainerSummaryStamina" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Enemy attacks can kill" />
+              <Label id="ParryTrainerSummaryDeath" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Standing-still drain" />
+              <Label id="ParryTrainerSummaryIdleDrain" text="" class="PTSettingValue" />
+            </Panel>
+          </Panel>
+          <Panel class="PTColumn">
+            <Label text="Creeps" class="PTHeading PTPreviewHeading" />
+            <Panel class="PTSettingLine">
+              <Label text="Lane troopers" />
+              <Label id="ParryTrainerSummaryTroopers" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel id="ParryTrainerSummarySpeedRow" class="PTSettingLine">
+              <Label text="Trooper speed" />
+              <Label id="ParryTrainerSummarySpeed" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Neutral camps" />
+              <Label id="ParryTrainerSummaryCamps" text="" class="PTSettingValue" />
+            </Panel>
+            <Label text="Session rules" class="PTHeading PTPreviewHeading" />
+            <Panel class="PTSettingLine">
+              <Label text="Finish condition" />
+              <Label id="ParryTrainerSummaryFinish" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel id="ParryTrainerSummaryTimerRow" class="PTSettingLine">
+              <Label text="Timer value" />
+              <Label id="ParryTrainerSummaryTimer" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel id="ParryTrainerSummaryGoalsRow" class="PTSettingLine">
+              <Label text="Goal values" />
+              <Label id="ParryTrainerSummaryGoals" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Lose on death" />
+              <Label id="ParryTrainerSummaryDeathRule" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Heavy melee hit limit" />
+              <Label id="ParryTrainerSummaryHitRule" text="" class="PTSettingValue" />
+            </Panel>
+            <Panel class="PTSettingLine">
+              <Label text="Soul penalties" />
+              <Label id="ParryTrainerSummarySoulPenalties" text="Off" class="PTSettingValue" />
+            </Panel>
+          </Panel>
+        </Panel>
+        <Label id="ParryTrainerPresetHint" class="PTGoalHint" text="" />
+        <Label id="ParryTrainerDifficultyFeedback" text="" class="PTDifficultyFeedback" />
+        <Button id="ParryTrainerPresetApply" class="PTPrimary" onactivate="ParryTrainerApplyPreset()" enabled="false" hittest="false" hittestchildren="false" acceptsfocus="true"><Label text="Apply" /></Button>
+      </Panel>
+      <Panel id="ParryTrainerPageCharacter" class="PTPage">
+        <Panel id="ParryTrainerProfileMain" class="PTProfileSection">
+          <Panel id="ParryTrainerLibraryNav" class="PTProfileBar">
+            <Button id="ParryTrainerLibraryDrills" class="PTSegment" onactivate="ParryTrainerLibrarySection('drills')" acceptsfocus="true"><Label text="Drills" /></Button>
+            <Button id="ParryTrainerLibraryBuilds" class="PTSegment" onactivate="ParryTrainerLibrarySection('builds')" acceptsfocus="true"><Label text="Hero builds" /></Button>
+            <Button id="ParryTrainerLibraryBackups" class="PTSegment" onactivate="ParryTrainerLibrarySection('backups')" acceptsfocus="true"><Label text="Backups" /></Button>
+            <Panel class="PTLibrarySpacer" />
+            <Button id="ParryTrainerProfileNew" class="PTPrimary" onactivate="ParryTrainerProfileSaveForm()" acceptsfocus="true"><Label id="ParryTrainerProfileNewLabel" text="Save drill" /></Button>
+          </Panel>
+          <Panel id="ParryTrainerLibraryEntries" class="PTProfileSection">
+            <Label id="ParryTrainerProfilesEmpty" text="Loading your library…" class="PTProfileMinor" />
+            <Panel id="ParryTrainerProfileRows" class="PTProfileScroll" />
+            <Label id="ParryTrainerBuildHeroHint" class="PTGoalHint" text="Play as a build’s hero to overwrite it." visible="false" />
+          </Panel>
+          <Panel id="ParryTrainerLibraryBackup" class="PTProfileSection">
+            <Label text="Whole-trainer backup" class="PTHeading" />
+            <Label text="Includes your current drill settings, saved drills and hero builds." class="PTProfileMinor" />
+            <Label text="backups/parry-trainer.json" class="PTBackupPath" />
+            <Panel class="PTProfileBar">
+              <Button id="ParryTrainerProfileExport" class="PTSubAction" onactivate="ParryTrainerProfileConfirm('export')" acceptsfocus="true"><Label text="Export backup" /></Button>
+              <Button id="ParryTrainerProfileImport" class="PTSubAction" onactivate="ParryTrainerProfileConfirm('import')" acceptsfocus="true"><Label text="Import backup" /></Button>
+            </Panel>
+          </Panel>
+          <Label text="End the session to load a saved entry or import a backup." class="PTProfileRunHint PTGoalHint" />
+        </Panel>
+        <Panel id="ParryTrainerProfileSaveForm" class="PTProfileSection">
+          <Label id="ParryTrainerProfileSaveTitle" text="Save drill" class="PTHeading" />
+          <Label text="Name" class="PTFieldLabel" />
+          <TextEntry id="ParryTrainerProfileNameInput" class="PTLimitInput PTLibraryName" maxchars="40" acceptsfocus="true" ontextentrychange="ParryTrainerProfileParts()" ontextentrysubmit="ParryTrainerProfileSave()" />
+          <Panel id="ParryTrainerBuildParts" class="PTProfileSection">
+            <Button id="ParryTrainerProfileInventory" class="ParryTrainerChoice" onactivate="ParryTrainerProfileTogglePart(1)" acceptsfocus="true">
+              <Label text="Inventory" /><Label id="ParryTrainerProfileInventoryValue" text="On" class="ParryTrainerValue" />
+            </Button>
+            <Button id="ParryTrainerProfileAbilities" class="ParryTrainerChoice" onactivate="ParryTrainerProfileTogglePart(2)" acceptsfocus="true">
+              <Label text="Level and abilities" /><Label id="ParryTrainerProfileAbilitiesValue" text="On" class="ParryTrainerValue" />
+            </Button>
+          </Panel>
+          <Button id="ParryTrainerDrillBuildChoice" class="ParryTrainerChoice" visible="false" onactivate="ParryTrainerProfileTogglePart(3)" acceptsfocus="true">
+            <Label id="ParryTrainerDrillBuildLabel" text="Include current hero build" /><Label id="ParryTrainerDrillBuildValue" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Label id="ParryTrainerProfileSaveDetail" text="" class="PTGoalHint" />
+          <Panel class="PTProfileFormActions">
+            <Button id="ParryTrainerProfileCancelSave" class="PTSubAction" onactivate="ParryTrainerProfileOverview()" acceptsfocus="true"><Label text="Cancel" /></Button>
+            <Button id="ParryTrainerProfileSave" class="PTPrimary" onactivate="ParryTrainerProfileSave()" acceptsfocus="true"><Label text="Save" /></Button>
+          </Panel>
+        </Panel>
+        <Panel id="ParryTrainerProfileChoose" class="PTProfileSection">
+          <Label id="ParryTrainerProfileChooseTitle" text="" class="PTHeading" />
+          <Panel id="ParryTrainerProfileOptions" class="PTProfileScroll" />
+          <Button id="ParryTrainerProfileBack" class="PTSubAction" onactivate="ParryTrainerProfileOverview()" acceptsfocus="true"><Label text="Back" /></Button>
+        </Panel>
+        <Panel id="ParryTrainerProfileConfirmation" class="PTProfileSection">
+          <Label id="ParryTrainerProfileConfirmTitle" text="" class="PTHeading" />
+          <Label id="ParryTrainerProfileConfirmDetail" text="" class="PTProfileMinor" />
+          <Panel class="PTProfileFormActions">
+            <Button id="ParryTrainerProfileCancelConfirm" class="PTSubAction" onactivate="ParryTrainerProfileOverview()" acceptsfocus="true"><Label text="Cancel" /></Button>
+            <Button id="ParryTrainerProfileDrillOnly" class="PTSubAction" onactivate="ParryTrainerProfileProceed(true)" acceptsfocus="true" visible="false"><Label text="Load drill only" /></Button>
+            <Button id="ParryTrainerProfileConfirm" class="PTPrimary" onactivate="ParryTrainerProfileProceed()" acceptsfocus="true">
+              <Label id="ParryTrainerProfileConfirmLabel" text="Confirm" />
+            </Button>
+          </Panel>
+        </Panel>
+        <Label id="ParryTrainerProfileFeedback" text="" class="PTProfileMinor" />
+      </Panel>
+      <Panel id="ParryTrainerPageCombat" class="PTPage">
+        <Panel class="PTColumn PTFirst">
+          <Label text="Melee opponents" class="PTHeading" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerPickHero(1)" acceptsfocus="true" id="ParryTrainerFirstHeroChoice">
+            <Label text="Opponent 1 hero" />
+            <Label id="ParryTrainerHero1" text="Random ›" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('second')" acceptsfocus="true" id="ParryTrainerSecondChoice">
+            <Label text="Second opponent" />
+            <Label id="ParryTrainerSecond" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerPickHero(2)" acceptsfocus="true" id="ParryTrainerSecondHeroChoice">
+            <Label text="Opponent 2 hero" />
+            <Label id="ParryTrainerHero2" text="Random ›" class="ParryTrainerValue" />
+          </Button>
+          <Panel id="ParryTrainerIntervalControl" class="PTSliderControl">
+            <Panel class="ParryTrainerDifficultyRow"><Label text="Time between melees" /></Panel>
+            <Panel id="ParryTrainerIntervalRail">
+              <Panel class="PTMeleeAxis" hittest="false" hittestchildren="false">
+                <Panel id="ParryTrainerIntervalBefore" /><Panel id="ParryTrainerIntervalBand" />
+              </Panel>
+              <Panel id="ParryTrainerIntervalInputs" class="PTMeleeInputs" hittest="false">
+                <Slider id="ParryTrainerIntervalMin" class="HorizontalSlider PTSlider PTMeleeSlider" direction="horizontal" min="0" max="1" increment="0.01" hittest="false" hittestchildren="true" acceptsfocus="true" />
+                <Slider id="ParryTrainerIntervalMax" class="HorizontalSlider PTSlider PTMeleeSlider" direction="horizontal" min="0" max="1" increment="0.01" hittest="false" hittestchildren="true" acceptsfocus="true" />
+                <Slider id="ParryTrainerIntervalBias" class="HorizontalSlider PTSlider PTMeleeSlider" direction="horizontal" min="0" max="1" increment="0.01" hittest="false" hittestchildren="true" acceptsfocus="true" />
+              </Panel>
+            </Panel>
+            <Panel class="PTMeleeChoices">
+              <Button id="ParryTrainerIntervalMinChoice" class="PTMeleeChoice" acceptsfocus="true" onactivate="ParryTrainerSelectMelee('interval_min')" onmoveleft="ParryTrainerStepMelee('interval_min', -1)" onmoveright="ParryTrainerStepMelee('interval_min', 1)">
+                <Label text="Minimum" /><Label id="ParryTrainerIntervalMinValue" class="PTMeleeValue" />
+              </Button>
+              <Button id="ParryTrainerIntervalBiasChoice" class="PTMeleeChoice" acceptsfocus="true" onactivate="ParryTrainerSelectMelee('interval_bias')" onmoveleft="ParryTrainerStepMelee('interval_bias', -1)" onmoveright="ParryTrainerStepMelee('interval_bias', 1)">
+                <Label text="Favored" /><Label id="ParryTrainerIntervalBiasValue" class="PTMeleeValue" />
+              </Button>
+              <Button id="ParryTrainerIntervalMaxChoice" class="PTMeleeChoice" acceptsfocus="true" onactivate="ParryTrainerSelectMelee('interval_max')" onmoveleft="ParryTrainerStepMelee('interval_max', -1)" onmoveright="ParryTrainerStepMelee('interval_max', 1)">
+                <Label text="Maximum" /><Label id="ParryTrainerIntervalMaxValue" class="PTMeleeValue" />
+              </Button>
+            </Panel>
+            <Label text="Each opponent uses its own timer." class="PTGoalHint" />
+          </Panel>
+        </Panel>
+        <Panel class="PTColumn">
+          <Label text="Attacks and visual cues" class="PTHeading" />
+          <Panel class="PTSliderControl">
+            <Panel class="ParryTrainerDifficultyRow"><Label text="Melee start distance" /></Panel>
+            <Panel id="ParryTrainerMeleeRail">
+              <Panel class="PTMeleeAxis" hittest="false" hittestchildren="false">
+                <Panel id="ParryTrainerMeleeBefore" /><Panel id="ParryTrainerMeleeBand" />
+              </Panel>
+              <Panel id="ParryTrainerMeleeInputs" class="PTMeleeInputs" hittest="false">
+                <Slider id="ParryTrainerMeleeMin" class="HorizontalSlider PTSlider PTMeleeSlider" direction="horizontal" min="0" max="1" increment="0.01" hittest="false" hittestchildren="true" acceptsfocus="true" />
+                <Slider id="ParryTrainerMeleeMax" class="HorizontalSlider PTSlider PTMeleeSlider" direction="horizontal" min="0" max="1" increment="0.01" hittest="false" hittestchildren="true" acceptsfocus="true" />
+                <Slider id="ParryTrainerMeleeBias" class="HorizontalSlider PTSlider PTMeleeSlider" direction="horizontal" min="0" max="1" increment="0.01" hittest="false" hittestchildren="true" acceptsfocus="true" />
+              </Panel>
+            </Panel>
+            <Panel class="PTMeleeChoices">
+              <Button id="ParryTrainerMeleeMinChoice" class="PTMeleeChoice" acceptsfocus="true" onactivate="ParryTrainerSelectMelee('melee_min')" onmoveleft="ParryTrainerStepMelee('melee_min', -1)" onmoveright="ParryTrainerStepMelee('melee_min', 1)">
+                <Label text="Minimum" /><Label id="ParryTrainerMeleeMinValue" class="PTMeleeValue" />
+              </Button>
+              <Button id="ParryTrainerMeleeBiasChoice" class="PTMeleeChoice" acceptsfocus="true" onactivate="ParryTrainerSelectMelee('melee_bias')" onmoveleft="ParryTrainerStepMelee('melee_bias', -1)" onmoveright="ParryTrainerStepMelee('melee_bias', 1)">
+                <Label text="Favored" /><Label id="ParryTrainerMeleeBiasValue" class="PTMeleeValue" />
+              </Button>
+              <Button id="ParryTrainerMeleeMaxChoice" class="PTMeleeChoice" acceptsfocus="true" onactivate="ParryTrainerSelectMelee('melee_max')" onmoveleft="ParryTrainerStepMelee('melee_max', -1)" onmoveright="ParryTrainerStepMelee('melee_max', 1)">
+                <Label text="Maximum" /><Label id="ParryTrainerMeleeMaxValue" class="PTMeleeValue" />
+              </Button>
+            </Panel>
+            <Label text="Drag a handle, or select a value and use ← / →." class="PTGoalHint" />
+            <Panel class="PTRangeHelp PTGoalHint">
+              <Label text="Hold" /><CitadelBinding action="ExtraInfo" show_single_bind="true" compact="true" /><Label text="to see ranges in the arena." />
+            </Panel>
+          </Panel>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('effects')" acceptsfocus="true" id="ParryTrainerEffectsChoice">
+            <Label text="Lunge trail and hand flash" />
+            <Label id="ParryTrainerEffects" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('parried')" acceptsfocus="true" id="ParryTrainerParriedChoice">
+            <Label text="Opponent stun effects" />
+            <Label id="ParryTrainerParried" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Label text="Also shows Stunned labels on affected targets." class="PTGoalHint" />
+        </Panel>
+      </Panel>
+      <Panel id="ParryTrainerPageHero" class="PTPage">
+        <Panel class="PTColumn PTFirst">
+          <Label text="Current hero" class="PTFieldLabel" />
+          <Label id="ParryTrainerProfileHero" text="Loading…" class="PTHeading" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerMaxLevel()" acceptsfocus="true" id="ParryTrainerMaxLevelButton">
+            <Label text="Set hero to max level" />
+          </Button>
+          <Label text="Practice rules" class="PTHeading PTSubheading" />
+          <Label text="These settings are saved with the drill." class="PTGoalHint" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('cooldown')" acceptsfocus="true" id="ParryTrainerCooldownChoice">
+            <Label text="Ability cooldowns" />
+            <Label id="ParryTrainerCooldown" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('stamina')" acceptsfocus="true" id="ParryTrainerStaminaChoice">
+            <Label text="Fast stamina regen" />
+            <Label id="ParryTrainerStamina" text="On" class="ParryTrainerValue" />
+          </Button>
+        </Panel>
+        <Panel class="PTColumn">
+          <Label text="Health" class="PTHeading" />
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('death')" acceptsfocus="true" id="ParryTrainerDeathChoice">
+            <Label text="Enemy attacks can kill" />
+            <Label id="ParryTrainerDeath" text="Off" class="ParryTrainerValue" />
+          </Button>
+          <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('idle_drain')" acceptsfocus="true" id="ParryTrainerIdleDrainChoice">
+            <Label text="Standing still drains health" />
+            <Label id="ParryTrainerIdleDrain" text="On" class="ParryTrainerValue" />
+          </Button>
+          <Panel id="ParryTrainerIdleRateControl" class="PTSliderControl">
+            <Panel class="ParryTrainerDifficultyRow">
+              <Label text="Max health lost per second" />
+              <Label id="ParryTrainerIdleRateValue" text="25%" class="PTSliderValue" />
+            </Panel>
+            <Slider id="ParryTrainerIdleRate" class="HorizontalSlider PTSlider" direction="horizontal" min="0" max="1" increment="0.0285714" acceptsfocus="true" />
+            <Panel hittest="false" class="ParryTrainerDifficultyRow ParryTrainerDifficultyEnds">
+              <Label text="15%" />
+              <Label text="50%" class="ParryTrainerDifficultyRight" />
+            </Panel>
+          </Panel>
+          <Label text="Catch a melee to avoid the drain during your parry. A miss applies the drain when the guard ends. The drain can kill even with lethal enemy attacks off." class="PTGoalHint PTDrainHint" />
+        </Panel>
+      </Panel>
+      <Panel id="ParryTrainerPageCreeps" class="PTPage">
+        <Button id="ParryTrainerSoulSourceBack" class="PTSubAction" onactivate="ParryTrainerOpenTab('Setup')" acceptsfocus="true"><Label text="‹ Back to Session" /></Button>
+        <Panel id="ParryTrainerCreepColumns">
+          <Panel class="PTColumn PTFirst">
+            <Label text="Lane troopers" class="PTHeading" />
+            <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('troopers')" acceptsfocus="true" id="ParryTrainerTroopersChoice">
+              <Label text="Spawn troopers" />
+              <Label id="ParryTrainerTroopers" text="Off" class="ParryTrainerValue" />
+            </Button>
+            <Panel id="ParryTrainerTrooperSettings" class="PTCreepSettings">
+              <Panel id="ParryTrainerTrooperCountChoice" class="PTStep">
+                <Label text="Troopers at once" class="PTStepTitle" />
+                <Panel class="PTStepper">
+                  <Button class="PTStepButton" onactivate="ParryTrainerStep('TrooperCount', -1)" acceptsfocus="true">
+                    <Label text="−" />
+                  </Button>
+                  <Label id="ParryTrainerTrooperCount" text="1" class="PTStepValue" />
+                  <Button class="PTStepButton" onactivate="ParryTrainerStep('TrooperCount', 1)" acceptsfocus="true">
+                    <Label text="+" />
+                  </Button>
+                </Panel>
+              </Panel>
+              <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('trooper_active')" acceptsfocus="true" id="ParryTrainerTrooperModeChoice">
+                <Label text="Behavior" />
+                <Label id="ParryTrainerTrooperMode" text="Stationary" class="ParryTrainerValue" />
+              </Button>
+              <Panel id="ParryTrainerTrooperSpeedControl" class="PTSliderControl">
+                <Panel class="ParryTrainerDifficultyRow">
+                  <Label text="Trooper speed" />
+                  <Label id="ParryTrainerTrooperSpeedValue" text="50%" class="PTSliderValue" />
+                </Panel>
+                <Slider id="ParryTrainerTrooperSpeed" class="HorizontalSlider PTSlider" direction="horizontal" min="0" max="1" increment="0.01" acceptsfocus="true" />
+                <Panel hittest="false" class="ParryTrainerDifficultyRow ParryTrainerDifficultyEnds">
+                  <Label text="10%" />
+                  <Label text="100%" class="ParryTrainerDifficultyRight" />
+                </Panel>
+              </Panel>
+              <Label text="Troopers spawn 20–50 m ahead. Each soul secured or missed opens its slot for the next trooper." class="PTGoalHint" />
+            </Panel>
+          </Panel>
+          <Panel class="PTColumn">
+            <Label text="Neutral camps" class="PTHeading" />
+            <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('camps')" acceptsfocus="true" id="ParryTrainerCampsChoice">
+              <Label text="Spawn camps" />
+              <Label id="ParryTrainerCamps" text="Off" class="ParryTrainerValue" />
+            </Button>
+            <Panel id="ParryTrainerCampSettings" class="PTCreepSettings">
+              <Panel id="ParryTrainerCampTierChoice" class="PTStep">
+                <Label text="Camp tier" class="PTStepTitle" />
+                <Panel class="PTStepper">
+                  <Button class="PTStepButton" onactivate="ParryTrainerStep('CampTier', -1)" acceptsfocus="true">
+                    <Label text="−" />
+                  </Button>
+                  <Label id="ParryTrainerCampTier" text="I" class="PTStepValue" />
+                  <Button class="PTStepButton" onactivate="ParryTrainerStep('CampTier', 1)" acceptsfocus="true">
+                    <Label text="+" />
+                  </Button>
+                </Panel>
+              </Panel>
+              <Button class="ParryTrainerChoice" onactivate="ParryTrainerToggle('camp_reactive')" acceptsfocus="true" id="ParryTrainerCampModeChoice">
+                <Label text="Behavior" />
+                <Label id="ParryTrainerCampMode" text="Retaliate" class="ParryTrainerValue" />
+              </Button>
+              <Label text="Clear the camp and secure or miss its last soul to spawn the next camp." class="PTGoalHint" />
+            </Panel>
+          </Panel>
+        </Panel>
+        <Label text="Keep a source for your soul goal. Enable the other source to switch." class="PTSoulSourceHint PTGoalHint" />
+        <Label text="Enable a source to earn souls toward your goal." class="PTMissingSoulSource PTGoalHint" />
+      </Panel>
+      <Panel id="ParryTrainerPageScore" class="PTPage" />
+      <Panel id="ParryTrainerSaveNotice" class="PTSaveNotice">
+        <Label id="ParryTrainerSaveNoticeText" class="PTSaveNoticeText" />
+        <Button id="ParryTrainerRetrySave" class="PTSubAction" onactivate="ParryTrainerRetrySave()" acceptsfocus="true"><Label id="ParryTrainerRetrySaveLabel" /></Button>
+      </Panel>
+      <Panel id="ParryTrainerFooter">
+        <Label id="ParryTrainerPhase" text="" hittest="false" />
+        <Button class="PTPrimary" onactivate="ParryTrainerRunAction()" acceptsfocus="true" id="ParryTrainerBegin">
+          <Label text="Begin session" id="ParryTrainerBeginLabel" />
+        </Button>
+      </Panel>
+    </Panel>
+    <Panel id="ParryTrainerPicker">
+      <Panel id="ParryTrainerPickerHeader">
+        <Label id="ParryTrainerPickerTitle" text="Opponent hero" />
+        <Button class="PTSubAction" onactivate="ParryTrainerClosePicker()" acceptsfocus="true" id="ParryTrainerPickerBack">
+          <Label text="Back" />
+        </Button>
+      </Panel>
+      <Panel id="ParryTrainerRoster" />
+    </Panel>
+  </Panel>
+  <Panel id="ParryTrainerResultHost" visible="false" hittest="false" hittestchildren="false" />
+</Panel>

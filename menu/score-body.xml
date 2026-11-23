@@ -1,0 +1,77 @@
+<Panel class="PTScoreBody">
+  <Panel class="PTScoreHeader">
+    <Label id="ParryTrainerScoreStatus" class="PTScoreStatus" text="No session yet" />
+    <Label id="ParryTrainerScoreElapsed" class="PTScoreElapsed" text="" />
+  </Panel>
+  <Label id="ParryTrainerScoreReason" class="PTScoreReason" text="Begin a session to record a score." />
+  <Label id="ParryTrainerScoreTarget" visible="false" class="PTScoreTarget" text="" />
+  <Label id="ParryTrainerScoreChanges" class="PTScoreChanges" visible="false" />
+  <Panel class="PTScoreColumns">
+    <Panel class="PTScoreColumn PTScoreFirst">
+      <Label text="Combat" class="PTScoreHeading" />
+      <Panel class="PTScoreRow">
+        <Label text="Successful parries" />
+        <Label id="ParryTrainerScoreParries" text="0" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Incoming heavy melees" />
+        <Label id="ParryTrainerScoreHeavies" text="0" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Heavy hits taken" />
+        <Label id="ParryTrainerScoreHits" text="0" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Parry rate" />
+        <Label id="ParryTrainerScoreParryRate" text="—" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Bullet accuracy" />
+        <Label id="ParryTrainerScoreWeaponAccuracy" text="—" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Total damage taken" />
+        <Label id="ParryTrainerScoreDamage" text="0 HP" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Deaths" />
+        <Label id="ParryTrainerScoreDeaths" text="0" class="PTScoreValue" />
+      </Panel>
+    </Panel>
+    <Panel class="PTScoreColumn">
+      <Label text="Souls" class="PTScoreHeading" />
+      <Panel class="PTSoulRow PTSoulHeader">
+        <Label class="PTSoulMetric" text="" />
+        <Label text="Troopers" />
+        <Label text="Camps" />
+      </Panel>
+      <Panel class="PTSoulRow">
+        <Label text="Secured" class="PTSoulMetric" />
+        <Label id="ParryTrainerScoreLaneSecured" text="0" />
+        <Label id="ParryTrainerScoreCampSecured" text="0" />
+      </Panel>
+      <Panel class="PTSoulRow">
+        <Label text="Missed" class="PTSoulMetric" />
+        <Label id="ParryTrainerScoreLaneMissed" text="0" />
+        <Label id="ParryTrainerScoreCampMissed" text="0" />
+      </Panel>
+      <Panel class="PTSoulRow">
+        <Label text="Creep kills" class="PTSoulMetric" />
+        <Label id="ParryTrainerScoreLaneKills" text="0" />
+        <Label id="ParryTrainerScoreCampKills" text="0" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Total orbs collected" />
+        <Label id="ParryTrainerScoreGrossSouls" text="0" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Soul deductions" />
+        <Label id="ParryTrainerScoreDeductions" text="0" class="PTScoreValue" />
+      </Panel>
+      <Panel class="PTScoreRow">
+        <Label text="Net soul score" />
+        <Label id="ParryTrainerScoreNetSouls" text="0" class="PTScoreValue" />
+      </Panel>
+    </Panel>
+  </Panel>
+</Panel>

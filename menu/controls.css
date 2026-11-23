@@ -1,0 +1,236 @@
+#ParryTrainerControls {
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+}
+#ParryTrainerMenu {
+  visibility: collapse;
+  horizontal-align: center;
+  vertical-align: top;
+  margin-top: 11%;
+  max-width: 96%;
+  max-height: 85%;
+  overflow: squish scroll;
+  width: 900px;
+  padding: 22px;
+  flow-children: down;
+}
+#ParryTrainerSettingsPage, #ParryTrainerPicker {
+  width: 100%;
+  flow-children: down;
+}
+/* Deadlock's HUD adds a 4px border on hover, which resizes auto-height rows. */
+#ParryTrainerMenu Button:hover { border: 0px solid #00000000; }
+#ParryTrainerPicker, #ParryTrainerSecondHeroChoice { visibility: collapse; }
+#ParryTrainerControls.ParryTrainerHasSecond #ParryTrainerSecondHeroChoice { visibility: visible; }
+#ParryTrainerControls.ParryTrainerPicking #ParryTrainerSettingsPage { visibility: collapse; }
+#ParryTrainerControls.ParryTrainerPicking #ParryTrainerPicker { visibility: visible; }
+
+#ParryTrainerPickerHeader { width: 100%; margin-bottom: 12px; }
+#ParryTrainerPickerTitle { font-family: sans; color: #f7f6ef; font-size: 26px; }
+#ParryTrainerPickerBack { horizontal-align: right; padding: 4px 12px; background-color: #36383a; }
+#ParryTrainerPickerBack:hover { background-color: #494c4e; }
+#ParryTrainerPickerBack Label { color: #f7f6ef; font-size: 19px; }
+#ParryTrainerRoster { width: 100%; flow-children: down; }
+.ParryTrainerHeroRow { width: 100%; height: 39px; flow-children: right; }
+.ParryTrainerHeroOption {
+  width: fill-parent-flow(1); height: 37px; padding: 0 0 0 9px; margin: 1px;
+  background-color: #26282a;
+}
+.ParryTrainerHeroOption Label { vertical-align: center; color: #efeee9; font-size: 18px; }
+.ParryTrainerHeroOption:hover { background-color: #404446; }
+.ParryTrainerHeroOption.SelectedHero { background-color: #3e5647; }
+.ParryTrainerHeroOption.SelectedHero:hover { background-color: #4d6957; }
+#ParryTrainerControls.PTMenuLatched #ParryTrainerMenu,
+#ParryTrainerControls.InSession.gScoreboardOpen #ParryTrainerMenu {
+  visibility: visible;
+}
+#ParryTrainerControls.gShopOpen #ParryTrainerMenu,
+#ParryTrainerControls.InSession.gScoreboardOpen.PTMenuDismissed #ParryTrainerMenu { visibility: collapse; }
+.ParryTrainerChoice {
+  width: 100%;
+  height: 41px; padding: 0 10px;
+  margin-top: 3px;
+  background-color: #26282a;
+  border-radius: 3px;
+}
+.ParryTrainerChoice:hover { background-color: #383b3d; }
+.ParryTrainerChoice Label { vertical-align: center; color: #efeee9; font-family: sans; font-size: 20px; }
+.ParryTrainerChoice .ParryTrainerValue { horizontal-align: right; color: #cae6ce; }
+.PTSliderControl {
+  width: 100%; padding: 8px 12px; flow-children: down;
+  background-color: #26282a; border-radius: 3px;
+}
+.ParryTrainerDifficultyRow { width: 100%; }
+.ParryTrainerDifficultyRow Label { color: #efeee9; font-family: sans; font-size: 20px; }
+.PTSliderValue { horizontal-align: right; color: #cae6ce; }
+#ParryTrainerMenu .PTSlider { width: 100%; height: 28px; margin: 1px 0; }
+#ParryTrainerMenu .PTSlider #SliderTrack { height: 6px; width: 100%; background-color: #505853; }
+#ParryTrainerMenu .PTSlider #SliderTrackProgress { height: 6px; background-color: #87a58a; }
+#ParryTrainerMenu .PTSlider #SliderThumb { width: 17px; height: 21px; background-color: #cae6ce; }
+#ParryTrainerIntervalControl { margin-top: 8px; }
+#ParryTrainerMeleeRail, #ParryTrainerIntervalRail { width: 100%; height: 36px; }
+.PTMeleeInputs { width: 100%; height: 100%; }
+.PTMeleeAxis {
+  width: 100%; height: 5px; margin: 0 9px; vertical-align: center; flow-children: right;
+  background-color: #505853; border-radius: 2px;
+}
+#ParryTrainerMeleeBefore, #ParryTrainerMeleeBand, #ParryTrainerIntervalBefore, #ParryTrainerIntervalBand { height: 100%; }
+#ParryTrainerMeleeBand, #ParryTrainerIntervalBand { background-color: #9bbba1; }
+#ParryTrainerMenu .PTMeleeSlider { height: 34px; vertical-align: center; z-index: 1; }
+#ParryTrainerMenu .PTMeleeSlider.PTMeleeFixed { opacity: 0; }
+#ParryTrainerMenu .PTMeleeSlider.PTMeleeEditing { z-index: 0; }
+#ParryTrainerMenu .PTMeleeSlider #SliderTrack, #ParryTrainerMenu .PTMeleeSlider #SliderTrackProgress { background-color: #00000000; box-shadow: none; }
+#ParryTrainerMenu .PTMeleeSlider:active #SliderTrack { height: 100%; }
+#ParryTrainerMenu .PTMeleeSlider #SliderThumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #26302a; background-color: #cce5ce;
+}
+#ParryTrainerMenu #ParryTrainerMeleeBias #SliderThumb, #ParryTrainerMenu #ParryTrainerIntervalBias #SliderThumb {
+  width: 6px; height: 29px; border-radius: 2px; border: 1px solid #443621; background-color: #ffe3a1;
+}
+.PTMeleeChoices { width: 100%; flow-children: right; }
+.PTMeleeChoice {
+  width: fill-parent-flow(1); height: 52px; flow-children: down;
+  padding: 3px 0; margin: 0 2px; border-radius: 3px; background-color: #2c3031;
+}
+.PTMeleeChoice:enabled:hover { background-color: #3b4141; }
+.PTMeleeChoice.PTMeleeEditing { background-color: #3d5044; }
+.PTMeleeChoice Label { horizontal-align: center; color: #c4c8be; font-family: sans; font-size: 15px; }
+.PTMeleeChoice .PTMeleeValue { color: #d9ebda; font-size: 18px; }
+#ParryTrainerMeleeBiasChoice .PTMeleeValue, #ParryTrainerIntervalBiasChoice .PTMeleeValue { color: #ffe3a1; }
+#ParryTrainerMeleeBiasChoice:disabled, #ParryTrainerIntervalBiasChoice:disabled { opacity: 0.55; }
+/* Reveal the floor without moving the captured slider or its readouts. */
+#ParryTrainerControls.PTRangePreview #ParryTrainerMenu { background-image: none; background-color: #13141515; }
+.PTRangePreview #ParryTrainerNav, .PTRangePreview #ParryTrainerFooter, .PTRangePreview #ParryTrainerSaveNotice,
+.PTRangePreview #ParryTrainerPageCombat .PTFirst, .PTRangePreview #ParryTrainerPageCombat .PTHeading,
+.PTRangePreview #ParryTrainerPageCombat .ParryTrainerChoice, .PTRangePreview #ParryTrainerPageCombat .PTGoalHint { opacity: 0.16; }
+.PTRangePreview #ParryTrainerPageCombat .PTSliderControl { background-color: #26282abe; }
+#ParryTrainerControls.PTRangePreview #ParryTrainerMenu .PTMeleeSlider #SliderThumb { background-color: #bbdbff; border-color: #273342; }
+#ParryTrainerControls.PTRangePreview #ParryTrainerMenu .PTMeleeSlider.PTActiveRing #SliderThumb { background-color: #ffe3a1; border-color: #443621; }
+#ParryTrainerControls.PTRangePreview .PTMeleeChoice .PTMeleeValue { color: #d1e7ff; }
+#ParryTrainerControls.PTRangePreview .PTMeleeChoice.PTActiveRing { background-color: #594b30; }
+#ParryTrainerControls.PTRangePreview .PTMeleeChoice.PTActiveRing .PTMeleeValue { color: #ffe3a1; }
+.ParryTrainerDifficultyEnds Label { font-size: 15px; color: #bec5be; }
+.ParryTrainerDifficultyRight { horizontal-align: right; }
+
+#ParryTrainerPagePresets, #ParryTrainerPageCreeps { flow-children: down; }
+#ParryTrainerCreepColumns { width: 100%; flow-children: right; }
+.PTCreepSettings { width: 100%; flow-children: down; }
+.PTSliderMiddle { horizontal-align: center; }
+#ParryTrainerTrooperSpeedControl, #ParryTrainerIdleRateControl { margin-top: 3px; }
+.PTPresetSections { width: 100%; flow-children: right; }
+.PTSettingLine { width: 100%; height: 28px; border-top: 1px solid #333735; }
+.PTSettingLine Label { vertical-align: center; color: #c7cac3; font-family: sans; font-size: 17px; }
+.PTSettingLine .PTSettingValue { horizontal-align: right; color: #f0f2e9; }
+#ParryTrainerPresetHint { vertical-align: center; color: #bec5be; font-family: sans; font-size: 16px; }
+#ParryTrainerPreset:disabled { opacity: 0.65; }
+
+/* Keep hero selection, aiming, escape and the player's parry feedback. */
+#minimap_persp, #TopBar, #unit_indicators_v2, #damage_indicator_offscreen_enemy,
+#DataFeed, #friendly_final_objective_container,
+#enemy_final_objective_container, #objectives_health_friendly, #objectives_health_enemy,
+#hintsPanel, #HudExperimentsContainer { visibility: collapse; }
+/* The stock damage-impact badge identifies the invisible opponent. */
+#damage_impact { visibility: collapse; }
+
+
+/* Give the visible wave targets their usual unit markers. */
+.ParryTrainerWaveUnits #unit_indicators_v2 { visibility: visible; }
+
+/* Practice uses the stock shop, build browser, inventory and ability HUD. */
+#gameplay_hud .action_upgrade, #CitadelHudDamageReport { visibility: collapse; }
+#ParryTrainerControls.InspectingLoadout #ParryTrainerMenu,
+#ParryTrainerControls.gEditingBuilds #ParryTrainerMenu, #ParryTrainerControls.gItemDraftOpen #ParryTrainerMenu { visibility: collapse; }
+
+#ParryTrainerNav { width: 100%; flow-children: right; margin-bottom: 16px; }
+.PTNav { horizontal-align: left; padding: 6px 10px; margin-right: 4px; background-color: #222527; border-radius: 3px; }
+.PTNav Label, .PTSegment Label, .PTSubAction Label, .PTPrimary Label, .PTStepButton Label { font-family: sans; font-size: 19px; color: #eeeae1; }
+.PTNav:hover, .PTSegment:hover, .PTSubAction:hover, .PTStepButton:hover { background-color: #424749; }
+.PTNav.Selected, .PTSegment.Selected { background-color: #3e5647; }
+.PTNav.Selected:hover, .PTSegment.Selected:hover { background-color: #506c58; }
+.PTPage { width: 100%; flow-children: right; visibility: collapse; }
+#ParryTrainerControls.OnHero #ParryTrainerPageHero,
+#ParryTrainerControls.OnSetup #ParryTrainerPageSetup, #ParryTrainerControls.OnCreeps #ParryTrainerPageCreeps,
+#ParryTrainerControls.OnPresets #ParryTrainerPagePresets, #ParryTrainerControls.OnCombat #ParryTrainerPageCombat, #ParryTrainerControls.OnScore #ParryTrainerPageScore { visibility: visible; }
+.PTColumn { width: fill-parent-flow(1); flow-children: down; }
+.PTFirst { margin-right: 14px; }
+.PTHeading { color: #dfddce; font-family: sans; font-weight: bold; font-size: 22px; margin-bottom: 7px; }
+.PTFieldLabel, .PTStepTitle { color: #d1d1c7; font-family: sans; font-size: 18px; }
+.PTFieldLabel { margin: 7px 0 4px 0; }
+.PTStep { width: 100%; height: 36px; margin: 2px 0 3px 0; padding-left: 10px; }
+.PTStepTitle { vertical-align: center; }
+.PTStepper { horizontal-align: right; vertical-align: center; flow-children: right; }
+.PTStepButton { width: 35px; height: 31px; background-color: #2e3232; border-radius: 3px; }
+.PTStepButton Label, .PTSegment Label { horizontal-align: center; vertical-align: center; }
+.PTStepValue { min-width: 44px; text-align: center; vertical-align: center; color: #efeee9; font-size: 20px; font-family: sans; }
+.PTDrainHint, #ParryTrainerIdleRateControl, .PTLimitFields, #ParryTrainerCurrentLimit { visibility: collapse; }
+#ParryTrainerControls.HasIdleDrain .PTDrainHint, #ParryTrainerControls.HasIdleDrain #ParryTrainerIdleRateControl,
+#ParryTrainerControls.HasHitLoss #ParryTrainerHitLimitFields, #ParryTrainerControls.TimerLimit #ParryTrainerTimerFields, #ParryTrainerControls.GoalLimit #ParryTrainerGoalFields { visibility: visible; }
+#ParryTrainerLimitControls, .PTLimitFields { width: 100%; flow-children: down; }
+.PTSegments { flow-children: right; width: 100%; }
+.PTSegment { horizontal-align: left; width: fill-parent-flow(1); height: 38px; background-color: #282c2d; margin-right: 3px; border-radius: 3px; }
+.PTInputRow { flow-children: right; }
+.PTInputRow .PTStepButton { vertical-align: center; }
+/* Panorama remeasures a TextEntry on click and can shrink it below its declared height. */
+.PTLimitInput { width: 120px; height: 34px; min-height: 34px; margin: 0 4px; padding: 4px 8px; color: #f7f6ef; background-color: #25282a; font-family: sans; font-size: 20px; border: 1px solid #565d56; }
+.PTLimitInput:focus { border: 1px solid #a9cbad; }
+.PTRangeHelp { flow-children: right; }
+.PTRangeHelp > Label, .PTRangeHelp > CitadelBinding { vertical-align: center; margin-right: 4px; }
+#ParryTrainerControls.InSession .PTRangeHelp { visibility: collapse; }
+.PTSubheading { margin-top: 14px; }
+.PTDeathHint { color: #bec5be; font-family: sans; font-size: 16px; margin: 5px 8px 9px 8px; }
+.PTGoalHint { color: #bec5be; font-family: sans; font-size: 16px; margin-top: 7px; }
+.PTError { font-family: sans; font-size: 16px; color: #f0b6a6; margin-top: 5px; }
+.PTSoulSourceHint { visibility: collapse; }
+.LastSoulSource .PTSoulSourceHint { visibility: visible; }
+.PTMissingSoulSource { visibility: collapse; }
+.MissingSoulSource .PTMissingSoulSource { visibility: visible; }
+#ParryTrainerTroopersChoice:disabled, #ParryTrainerCampsChoice:disabled,
+#ParryTrainerHitLossChoice:disabled, #ParryTrainerHitLimitFields:disabled { opacity: 0.75; }
+#ParryTrainerBegin:disabled, #ParryTrainerReset:disabled { opacity: 0.65; }
+.PTCurrentLimit { color: #ecebdc; font-family: sans; font-size: 20px; }
+#ParryTrainerControls.InSession #ParryTrainerCurrentLimit { visibility: visible; }
+#ParryTrainerControls.InSession #ParryTrainerLimitControls { visibility: collapse; }
+#ParryTrainerFooter { width: 100%; margin-top: 16px; }
+#ParryTrainerPhase { horizontal-align: left; vertical-align: center; color: #b9c8bf; font-family: sans; font-size: 18px; }
+.PTSubAction, .PTPrimary { padding: 7px 14px; border-radius: 3px; }
+.PTSubAction { background-color: #303434; }
+.PTNavSpacer { width: fill-parent-flow(1); }
+#ParryTrainerReset { vertical-align: center; min-width: 77px; padding: 6px 10px; background-color: #82471e; }
+#ParryTrainerReset Label { horizontal-align: center; color: #fff0de; }
+#ParryTrainerReset:hover { background-color: #a45b27; }
+.PTPrimary { horizontal-align: right; background-color: #abc6ab; }
+.PTPrimary Label { color: #17241c; font-weight: bold; }
+.PTPrimary:enabled:hover { background-color: #c8ddbd; }
+#ParryTrainerHud { horizontal-align: center; vertical-align: top; margin-top: 9px; border-radius: 5px; padding: 3px 8px; background-color: #00000099; }
+#ParryTrainerHudStats { flow-children: right; horizontal-align: center; }
+.PTHudColumn { flow-children: down; margin: 0 10px; }
+.PTHudStat { color: offWhite; font-family: numericBlock; font-size: 20px; text-align: center; horizontal-align: center; }
+.PTHudTitle { color: #c4cfc6; font-family: sans; font-size: 16px; font-weight: semi-bold; horizontal-align: center; }
+#ParryTrainerHudLimit { visibility: collapse; }
+#ParryTrainerHudText { color: #cbe5d3; }
+#ParryTrainerControls.HasHudText #ParryTrainerHudLimit { visibility: visible; }
+#ParryTrainerControls.gShopOpen #ParryTrainerHud, #ParryTrainerControls.gEditingBuilds #ParryTrainerHud,
+#ParryTrainerControls.gItemDraftOpen #ParryTrainerHud { visibility: collapse; }
+#ParryTrainerCountdown { width: 100%; height: 100%; visibility: collapse; }
+#ParryTrainerResultHost { width: 100%; height: 100%; }
+#ParryTrainerControls.Counting #ParryTrainerCountdown { visibility: visible; }
+#ParryTrainerControls.gScoreboardOpen #ParryTrainerCountdown, #ParryTrainerControls.gShopOpen #ParryTrainerCountdown { visibility: collapse; }
+#hud_hero_testing { visibility: collapse; }
+
+#ParryTrainerSoulSourceBack { visibility: collapse; }
+.ChoosingSoulSource #ParryTrainerSoulSourceBack { visibility: visible; }
+#ParryTrainerSoulSourceBack { margin-bottom: 12px; }
+#ParryTrainerMenu Button:focus { box-shadow: inset #b3cebc 0px 0px 0px 2px; }
+#ParryTrainerMenu Button.PTNav:focus { box-shadow: none; }
+
+.PTHudHelp { flow-children: right; horizontal-align: center; }
+#ParryTrainerHudKey { margin-right: 5px; }
+
+/* Start collapsed even before the first host snapshot. */
+.PTSaveNotice { visibility: collapse; width: 100%; flow-children: right; margin-top: 8px; }
+.PTSaveNotice.SaveFailed { visibility: visible; }
+.PTSaveNoticeText { width: fill-parent-flow(1); vertical-align: center; color: #f2d4a2; font-size: 17px; font-family: sans; }
+#ParryTrainerRetrySave { visibility: collapse; margin-left: 8px; vertical-align: center; }
+.PTSaveNotice.CanRetry #ParryTrainerRetrySave { visibility: visible; }

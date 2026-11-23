@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""Build or play the native Hyperline mod using the Modlock developer CLI."""
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+
+from build_native_menu import build_native_menu
+
+ROOT = Path(__file__).resolve().parents[1]
+NATIVE = ROOT / "native"
+STATE = ROOT / ".runtime/hyperline"
+VERSION = "v0.1.106"
+
+
+def tool():
+    cli = os.environ.get("MODLOCK_CLI") or shutil.which("modlock") or STATE / ("modlock.exe" if os.name == "nt" else "modlock")
+    if not Path(cli).is_file():
+        raise ValueError(f"Install the Modlock {VERSION} developer CLI on PATH, or set MODLOCK_CLI to its path.")
+    if subprocess.check_output([cli, "version"], text=True).strip().split()[-1] != VERSION:
+        raise ValueError(f"This version of Parry Trainer builds with Modlock {VERSION}. Set MODLOCK_CLI to that version.")
+    return cli
+
+
+def stage(project, probe):
+    # Stage only the shared server modules and authored native content. Modlock
+    # treats the project root as its SDK/dependency boundary during type checking.
+    for pattern in ("*.ts", "*.js"):
+        for source in ROOT.glob(pattern):
+            if source.name != "main.ts":
+                shutil.copyfile(source, project / source.name)
+    (project / "native").mkdir()
+    for source in [*NATIVE.glob("*.ts"), NATIVE / "save-codec.js"]:
+        shutil.copyfile(source, project / "native" / source.name)
+    manifest = json.loads((NATIVE / "mod.json").read_text())
+    manifest.update(json.loads((NATIVE / "persistence.json").read_text()))
+    (project / "mod.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    shutil.copyfile(ROOT / "tsconfig.json", project / "tsconfig.json")
+    shutil.copytree(NATIVE / "maps", project / "maps")
+    shutil.copytree(NATIVE / "content", project / "content")
+    build_native_menu(ROOT, project / "content")
+    entry = "import './native/main'\n"
+    if probe:
+        (project / "tests").mkdir()
+        shutil.copyfile(ROOT / "tests" / f"{probe}.ts", project / "tests" / f"{probe}.ts")
+        arg = "'stock'" if probe in ("cues", "parried") else ""
+        entry += f"import register from './tests/{probe}'\nregister({arg})\n"
+    (project / "main.ts").write_text(entry)
+    return manifest
+
+
+def package(build, manifest):
+    destination = ROOT / "dist"
+    destination.mkdir(exist_ok=True)
+    target = destination / f"{manifest['slug']}-{manifest['version']}-hyperline.zip"
+    # Only the local build product is archived. Hyperline publishes the same
+    # manifest, map, module and addon through its standard publish command.
+    with tempfile.TemporaryDirectory(dir=destination) as tmp:
+        packed = Path(tmp) / target.name
+        with ZipFile(packed, "w") as archive:
+            files = [build / "mod.json", build / "mod.js", build / "maps" / f"{manifest['map']}.vpk"]
+            for kind in ("panorama", "particles", "materials", "models", "data"):
+                files.extend((build / kind).rglob("*"))
+            for path in sorted(files):
+                if path.is_file():
+                    entry = ZipInfo(path.relative_to(build).as_posix())
+                    entry.external_attr = 0o100644 << 16
+                    archive.writestr(entry, path.read_bytes(), compress_type=ZIP_DEFLATED, compresslevel=9)
+        packed.replace(target)
+    return target
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", nargs="?", choices=("build", "verify", "play", "draft", "probe-build"), default="build")
+    parser.add_argument("probe", nargs="?", choices=sorted(p.stem for p in (ROOT / "tests").glob("*.ts")))
+    args = parser.parse_args()
+    if (args.action == "probe-build") != bool(args.probe):
+        parser.error("use probe-build with the name of one gameplay probe")
+    cli = tool()
+    STATE.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, "MODLOCK_NO_UPDATE_CHECK": "1"}
+    with tempfile.TemporaryDirectory(dir=STATE, prefix="stage-") as tmp:
+        project = Path(tmp)
+        manifest = stage(project, args.probe)
+        if args.action == "verify":
+            # Run the same manifest, asset and module checks as a Hyperline upload,
+            # with only a local destination. Discard the SDK's standalone wrapper.
+            subprocess.run([cli, "publish", "--to", "archive", "--out", tmp, project], env=env, check=True)
+            return
+        if args.action == "draft":
+            subprocess.run([cli, "publish", "--to", "hyperline", "--prerelease", project], env=env, check=True)
+            return
+        subprocess.run([cli, "build", "--release", project], env=env, check=True)
+        if args.action == "play":
+            # A path named <project>/build stores local accounts inside that
+            # source project. Use the normal installed-mod store across launches.
+            release = project / "release"
+            (project / "build").rename(release)
+            subprocess.run([cli, "play", "--watch=false", release], env=env, check=True)
+        elif args.action == "probe-build":
+            # A separate output per probe permits sequential or isolated parallel engine tests.
+            out = STATE / "probes" / args.probe
+            out.parent.mkdir(exist_ok=True)
+            if out.exists():
+                shutil.rmtree(out)
+            (project / "build").rename(out)
+            print(out)
+        else:
+            target = package(project / "build", manifest)
+            print(f"{target} ({target.stat().st_size:,} bytes)")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        sys.exit(str(error))

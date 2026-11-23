@@ -1,0 +1,8 @@
+.runtime/
+.modlock/
+build/
+node_modules/
+__pycache__/
+map-src/target/
+/dist/*
+!/dist/parry-trainer-*-hyperline.zip

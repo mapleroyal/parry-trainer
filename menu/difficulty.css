@@ -1,0 +1,16 @@
+.PTPreviewSliderRow { width: 100%; flow-children: right; }
+#ParryTrainerChooseSource { margin-top: 7px; }
+.PTDifficultyFeedback { color: #c6e6bd; font-family: sans; font-size: 16px; }
+#ParryTrainerMenu .PTPreviewSliderRow #ParryTrainerPreset { width: fill-parent-flow(1); vertical-align: center; margin: 0 8px; }
+#ParryTrainerPresetActive { font-size: 17px; color: #b9c5bc; vertical-align: center; }
+.PTPreviewHeading { margin-top: 6px; margin-bottom: 2px; font-size: 19px; }
+.PTSettingLine .PTSettingValue.PTPreviewChanged { color: #ccedab; font-weight: bold; }
+#ParryTrainerPresetApply { margin-top: 6px; }
+#ParryTrainerPresetApply:disabled, .PTPreviewSliderRow .PTStepButton:disabled { opacity: 0.45; }
+#ParryTrainerControls.OnPresets #ParryTrainerBegin { visibility: collapse; }
+#ParryTrainerControls.OnPresets.TemplateApplied #ParryTrainerBegin,
+#ParryTrainerControls.OnPresets.InSession #ParryTrainerBegin { visibility: visible; }
+.PTBetweenSessions { visibility: collapse; }
+#ParryTrainerControls.InSession .PTBetweenSessions { visibility: visible; }
+.PTPreviewIdentity { flow-children: right; horizontal-align: right; }
+.PTPreviewIdentity .PTPreviewCaption { vertical-align: center; margin-right: 7px; color: #b9c5bc; font-size: 17px; }

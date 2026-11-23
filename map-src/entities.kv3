@@ -1,0 +1,77 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+    entities = [
+        {
+            classname = "worldspawn" origin = "0 0 0" worldname = "hl_parry_trainer" mapUsageType = "standard"
+            startdark = false startcolor = [0, 0, 0] skyname = "materials/skybox/light_test_dark.vmat"
+        },
+        {
+            classname = "env_sky" targetname = "black_sky" origin = "0 0 256"
+            skyname = "materials/skybox/light_test_dark.vmat" tint_color = [0, 0, 0]
+            lighting_only_tint_color = [255, 255, 255] brightnessscale = 0.0
+            fog_type = "0" StartDisabled = false
+        },
+        {
+            classname = "light_environment" targetname = "hero_light" origin = "0 0 512" angles = "55 325 0"
+            enabled = true color = [255, 250, 245] brightness = 4.0 brightnessscale = 1.0
+            directlight = "3" indirectlight = "1" renderdiffuse = "1" renderspecular = "1"
+            castshadows = "0" skycolor = [210, 218, 240] skyintensity = 1.0 skydirectlight = "1"
+        },
+        // Four broad, shadowless fill lights keep actors readable from every bearing.
+        // The void floor is collision only, so lighting cannot reveal a surface.
+        {
+            classname = "light_omni2" clientSideEntity = "1"
+            enabled = true origin = "4242 4242 5000" color = [255, 247, 240]
+            brightness = 15.0 directlight = "3" castshadows = "0"
+            range = 20000 inner_angle = 180 outer_angle = 180 renderdiffuse = "1" renderspecular = "1"
+            attenuation1 = 0 attenuation2 = 1 lightsourceradius = 2
+        },
+        {
+            classname = "light_omni2" clientSideEntity = "1"
+            enabled = true origin = "-4242 4242 5000" color = [255, 247, 240]
+            brightness = 15.0 directlight = "3" castshadows = "0"
+            range = 20000 inner_angle = 180 outer_angle = 180 renderdiffuse = "1" renderspecular = "1"
+            attenuation1 = 0 attenuation2 = 1 lightsourceradius = 2
+        },
+        {
+            classname = "light_omni2" clientSideEntity = "1"
+            enabled = true origin = "-4242 -4242 5000" color = [255, 247, 240]
+            brightness = 15.0 directlight = "3" castshadows = "0"
+            range = 20000 inner_angle = 180 outer_angle = 180 renderdiffuse = "1" renderspecular = "1"
+            attenuation1 = 0 attenuation2 = 1 lightsourceradius = 2
+        },
+        {
+            classname = "light_omni2" clientSideEntity = "1"
+            enabled = true origin = "4242 -4242 5000" color = [255, 247, 240]
+            brightness = 15.0 directlight = "3" castshadows = "0"
+            range = 20000 inner_angle = 180 outer_angle = 180 renderdiffuse = "1" renderspecular = "1"
+            attenuation1 = 0 attenuation2 = 1 lightsourceradius = 2
+        },
+        // Lane AI requires native marching paths for all four squad slots.
+        {
+            classname = "lane_marker_path" origin = "-7980 -128 4" LaneNum = "1" LaneSlot = "0"
+            pathNodes = "[[0,0,0,0,0,0,5200,0,0],[15960,0,0,-5200,0,0,0,0,0]]"
+        },
+        {
+            classname = "lane_marker_path" origin = "-7980 -64 4" LaneNum = "1" LaneSlot = "1"
+            pathNodes = "[[0,0,0,0,0,0,5200,0,0],[15960,0,0,-5200,0,0,0,0,0]]"
+        },
+        {
+            classname = "lane_marker_path" origin = "-7980 0 4" LaneNum = "1" LaneSlot = "2"
+            pathNodes = "[[0,0,0,0,0,0,5200,0,0],[15960,0,0,-5200,0,0,0,0,0]]"
+        },
+        {
+            classname = "lane_marker_path" origin = "-7980 64 4" LaneNum = "1" LaneSlot = "3"
+            pathNodes = "[[0,0,0,0,0,0,5200,0,0],[15960,0,0,-5200,0,0,0,0,0]]"
+        },
+        { classname = "info_trooper_spawn" origin = "-7960 0 4" DisableZiplining = true LaneNum = "1" teamnumber = "2" },
+        { classname = "info_trooper_spawn" origin = "7960 0 4" DisableZiplining = true LaneNum = "1" teamnumber = "3" },
+        { classname = "info_player_start" origin = "0 0 8" },
+        { classname = "info_team_spawn" teamnumber = "2" LaneNum = "0" InitialSpawn = true origin = "0 0 8" },
+        { classname = "info_team_spawn" teamnumber = "2" LaneNum = "0" InitialSpawn = false origin = "64 0 8" },
+        { classname = "info_team_spawn" teamnumber = "3" LaneNum = "0" InitialSpawn = true origin = "512 0 8" },
+        { classname = "info_team_spawn" teamnumber = "3" LaneNum = "0" InitialSpawn = false origin = "-512 0 8" },
+        { classname = "citadel_minimap_boundary" origin = "-8192 -8192 0" },
+        { classname = "citadel_minimap_boundary" origin = "8192 8192 0" }
+    ]
+}

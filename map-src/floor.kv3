@@ -1,0 +1,49 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+    m_nFlags = 0
+    m_nRefCounter = 0
+    m_bCompoundsPacked = false
+    m_bonesHash = [] m_boneNames = [] m_indexNames = [] m_indexHash = [] m_bindPose = []
+    m_parts = [
+        {
+            m_nFlags = 2
+            m_flMass = 0.0
+            m_rnShape = {
+                m_spheres = [] m_capsules = [] m_hulls = []
+                m_meshes = [{
+                    m_nCollisionAttributeIndex = 0
+                    m_nSurfacePropertyIndex = 0
+                    m_UserFriendlyName = "floor"
+                    m_bUserFriendlyNameSealed = false
+                    m_bUserFriendlyNameLong = false
+                    m_nToolMaterialHash = 0
+                    m_Mesh = {
+                        // The map builder fills the bounds and area from the floor vertices.
+                        m_vMin = []
+                        m_vMax = []
+                        m_Materials = []
+                        m_vOrthographicAreas = [ 0.0, 0.0, 1.0 ]
+                        m_nFlags = 0
+                        m_nDebugFlags = 0
+                        m_flSurfaceArea = 0.0
+                    }
+                }]
+                m_CollisionAttributeIndices = []
+            }
+            m_nCollisionAttributeIndex = 0
+            m_nReserved = 0
+            m_flInertiaScale = 1.0 m_flLinearDamping = 0.0 m_flAngularDamping = 0.0
+            m_bOverrideMassCenter = false m_vMassCenterOverride = [ 0.0, 0.0, 0.0 ]
+        }
+    ]
+    m_constraints2 = [] m_joints = [] m_pFeModel = null m_boneParents = []
+    m_surfacePropertyHashes = [ 1977497166 ]
+    m_collisionAttributes = [{
+        m_nIncludeDetailLayerCount = 0
+        m_CollisionGroup = 1977497166
+        m_InteractAs = [] m_InteractWith = [] m_InteractExclude = [] m_DetailLayers = []
+        m_CollisionGroupString = "Default"
+        m_InteractAsStrings = [] m_InteractWithStrings = [] m_InteractExcludeStrings = [] m_DetailLayerStrings = []
+    }]
+    m_debugPartNames = [] m_embeddedKeyvalues = ""
+}

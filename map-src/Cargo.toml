@@ -1,0 +1,11 @@
+[package]
+name = "build-parry-trainer-map"
+version = "0.1.0"
+edition = "2024"
+publish = false
+default-run = "native-arena"
+
+[dependencies]
+source2-kv3 = { git = "https://github.com/deadlock-plus/source2-rs", rev = "2b73748e7bc8d901cbdbef60d8d68ddaddd3159f" }
+source2-resource = { git = "https://github.com/deadlock-plus/source2-rs", rev = "2b73748e7bc8d901cbdbef60d8d68ddaddd3159f" }
+source2-vpk = { git = "https://github.com/deadlock-plus/source2-rs", rev = "2b73748e7bc8d901cbdbef60d8d68ddaddd3159f" }
