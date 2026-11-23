@@ -4,10 +4,10 @@ A solo Deadlock training mode for Windows and Linux. Stand still, run, shoot or 
 
 ## Play
 
-Parry Trainer 0.4.0 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
+Parry Trainer 0.4.1 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
 
-1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.0-hyperline.zip) and extract it.
-2. Close Deadlock and leave Steam running.
+1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.1-hyperline.zip) and extract it into a fresh folder.
+2. Close Deadlock and finish any queued Deadlock update in Steam Downloads. Leave Steam running. The local host and game share files, so applying a patch during practice can disconnect you.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
 To run from a source checkout, use `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
@@ -95,7 +95,7 @@ Applying a template replaces the trainer options, selects random opponents and s
 
 Every template keeps the same maximum melee distance. **Easiest (0)** fixes every start at 13.4 m and shows the opponent’s lunge and stun effects. **Normal (50)** uses the far half of the range, from 6.9 to 13.4 m, and favors its midpoint at 10.1 m. Above Normal, both the minimum and favored distance move closer. Template 99 still leaves 2.4 m of separation. **Hardest (100)** opens the full 0.25–13.4 m range and favors point blank. About one in eight of its punches still starts beyond the halfway point.
 
-Distance is measured between the heroes at the start of the windup. The maximum is a stock heavy started from rest on level ground, pressing forward and melee together. In Deadlock build 6864, the trainer hit a stationary target at 529.4 Source units (13.45 m) and missed at 529.5. The target’s collision shape gives diagonal approaches a little extra reach, so the trainer uses a reachable heading for long punches. A running start, dash or movement after the windup changes the distance a punch can cover in a match.
+Distance is measured between the heroes at the start of the windup. The maximum is a stock heavy started from rest on level ground, pressing forward and melee together. In Deadlock build 6865, the trainer hit a stationary target at 529.4 Source units (13.45 m) and missed at 529.5. The target’s collision shape gives diagonal approaches a little extra reach, so the trainer uses a reachable heading for long punches. A running start, dash or movement after the windup changes the distance a punch can cover in a match.
 
 **Harder** templates introduce pursuing troopers, stronger camps, standard stamina and cooldowns, and a second attacker as the slider rises. The heavy-hit soul penalty starts at 70, the unparried-heavy penalty at 85, and the empty-parry penalty at 100. Later steps also introduce a hit limit and let enemy attacks kill you. **Hardest (100)** enables losing on any death and sets a one-hit limit.
 
@@ -120,7 +120,9 @@ The first command writes the mod-only ZIP in `dist/`. It includes the compiled g
 
 To run the HUD and gameplay-state tests with Node 24 or later, use `node --test tests/*.mjs menu/*.test.cjs`.
 
-For a dedicated-server check, `bin/hyperline probe-build cues` builds the stock-melee probe in `.runtime/hyperline/probes/cues`. Run the pinned CLI with `modlock play --no-game --watch=false .runtime/hyperline/probes/cues` and look for `PARRY TRAINER PROBE PASS`. The `session`, `tracking`, `melee-distance`, `respawn` and `hero` probes use the same workflow. Run these engine checks with the game closed.
+For a dedicated-server check, `bin/hyperline probe-build cues` builds the stock-melee probe in `.runtime/hyperline/probes/cues`. Run the pinned CLI with `modlock play --no-game --watch=false .runtime/hyperline/probes/cues` and look for `PARRY TRAINER PROBE PASS`. The `quiet-melee` probe checks weapon selection and restoration across the playable roster. The `session`, `tracking`, `melee-distance`, `parried`, `respawn` and `hero` probes use the same workflow. Run these engine checks with the game closed.
+
+To check the visuals after a Deadlock update, open the built mod with the stock CLI. Fix the melee distance at maximum, then compare attacks and successful parries with each effects switch off and on. The client draws some particles that a dedicated-server test cannot see.
 
 To regenerate the committed map and marker assets after editing their source:
 

@@ -5,7 +5,9 @@ function ParryTrainerGuardRetailHud(game) {
     var changed = new Map(), previousRefresh = -Infinity;
     var ids = ['damage_indicator_offscreen_enemy', 'DataFeed', 'friendly_final_objective_container',
         'enemy_final_objective_container', 'objectives_health_friendly', 'objectives_health_enemy',
-        'hintsPanel', 'HudExperimentsContainer', 'damage_impact', 'CitadelHudDamageReport', 'hud_hero_testing'];
+        'hintsPanel', 'HudExperimentsContainer', 'damage_impact', 'CitadelHudDamageReport', 'hud_hero_testing',
+        // Local Modlock puts its corner mark and version line together under its reserved mod name.
+        'ModlockUi_modlock'];
     var panels = [], units, indicators, announcements, timer;
 
     function restore(panel, original) {

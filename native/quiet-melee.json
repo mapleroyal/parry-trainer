@@ -1,0 +1,72 @@
+[
+  {
+    "entry": "citadel_ability_melee_targetdummy",
+    "weapons": [
+      "ability_melee_archer",
+      "ability_melee_artist",
+      "ability_melee_astro",
+      "ability_melee_baba",
+      "ability_melee_bookworm",
+      "ability_melee_chessmaster",
+      "ability_melee_deadpack",
+      "ability_melee_digger",
+      "ability_melee_doorman",
+      "ability_melee_drifter",
+      "ability_melee_familiar",
+      "ability_melee_fencer",
+      "ability_melee_frank",
+      "ability_melee_ghost",
+      "ability_melee_haze",
+      "ability_melee_inferno",
+      "ability_melee_kelvin",
+      "ability_melee_magician",
+      "ability_melee_mirage",
+      "ability_melee_nano",
+      "ability_melee_necro",
+      "ability_melee_nurse",
+      "ability_melee_priest",
+      "ability_melee_unicorn",
+      "ability_melee_vampirebat",
+      "ability_melee_viper",
+      "ability_melee_viscous",
+      "ability_melee_werewolf",
+      "ability_melee_yamato",
+      "citadel_ability_melee_bebop",
+      "citadel_ability_melee_bull",
+      "citadel_ability_melee_chrono",
+      "citadel_ability_melee_engineer",
+      "citadel_ability_melee_genericperson",
+      "citadel_ability_melee_gigawatt",
+      "citadel_ability_melee_hornet",
+      "citadel_ability_melee_shiv",
+      "citadel_ability_melee_sumo",
+      "citadel_ability_melee_tengu",
+      "citadel_ability_melee_warden",
+      "citadel_ability_melee_wraith"
+    ]
+  },
+  {
+    "entry": "citadel_ability_melee_kali",
+    "weapons": [
+      "ability_melee_ratking"
+    ],
+    "properties": {
+      "MeleeHalfAngle": 40
+    }
+  },
+  {
+    "entry": "citadel_ability_melee_thumper",
+    "weapons": [
+      "ability_melee_lash"
+    ],
+    "textFields": {
+      "CitadelAbilityVData.m_strAG2CastCompletedAction": "lash_grapple"
+    }
+  },
+  {
+    "entry": "ability_melee_punkgoat",
+    "weapons": [
+      "ability_melee_punkgoat"
+    ]
+  }
+]

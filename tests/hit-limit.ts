@@ -2,6 +2,7 @@
 import { addBot, Buttons, damage, findEntities, log, onDamaged, onFrame, onMelee,
   players, readField, serverCommand, type Player } from 'modlock'
 import { beginTraining, setMeleeDistances, stopTraining, testSubject, waveSettings } from '../gameplay'
+import { billyParticleResources, lungeDust } from '../particles'
 import { session } from '../session'
 import { changeSetting } from '../trainer-settings'
 
@@ -40,6 +41,8 @@ export default function registerHitLimitProbe(): void {
     if (stage === 'setup') {
       setMeleeDistances(0, 0, 50)
       waveSettings.troopers = true
+      // End the run on a punch with live hand and lunge effects.
+      if (!changeSetting('hero1', 'hero_punkgoat') || !changeSetting('effects', '1')) { finish(false, 'opponent'); return }
       if (!changeSetting('hit_limit', '2') || !changeSetting('fail_on_hits', '1')) { finish(false, 'settings'); return }
       if (beginTraining({ mode: 'none' })) stage = 'damage'
     } else if (stage === 'damage' && session.phase === 'running' && opponent && findEntities('npc_trooper').length) {
@@ -66,6 +69,14 @@ export default function registerHitLimitProbe(): void {
       }
       stage = 'cleanup'
       stopped = now
+    } else if (stage === 'cleanup' && now - stopped >= 0.1 && now - stopped < 2) {
+      const effects = [lungeDust, ...billyParticleResources]
+      for (const entity of findEntities('info_particle_system')) {
+        const name = readField(entity, 'CParticleSystem', 'm_iszEffectName', 'string')
+        if (typeof name === 'string' && effects.includes(name) && readField(entity, 'CParticleSystem', 'm_bActive', 'bool')) {
+          finish(false, 'opponent effect still active after defeat'); return
+        }
+      }
     } else if (stage === 'cleanup' && now - stopped >= 2) {
       finish(session.phase === 'finished' && session.reason === 'hits' && session.parries === 1 &&
         session.hits === 2 && contacts === 2 && !opponent && !findEntities('npc_trooper').length,

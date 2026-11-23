@@ -11,6 +11,8 @@ import tempfile
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 from build_native_menu import build_native_menu
+from quiet_melee import stage_quiet_melee
+from steam_ready import check_steam_ready, deadlock_dir, steam_roots
 
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "native"
@@ -39,6 +41,7 @@ def stage(project, probe):
         shutil.copyfile(source, project / "native" / source.name)
     manifest = json.loads((NATIVE / "mod.json").read_text())
     manifest.update(json.loads((NATIVE / "persistence.json").read_text()))
+    manifest.setdefault("definitions", []).extend(stage_quiet_melee(NATIVE, project))
     (project / "mod.json").write_text(json.dumps(manifest, indent=2) + "\n")
     shutil.copyfile(ROOT / "tsconfig.json", project / "tsconfig.json")
     shutil.copytree(NATIVE / "maps", project / "maps")
@@ -103,6 +106,8 @@ def main():
             # source project. Use the normal installed-mod store across launches.
             release = project / "release"
             (project / "build").rename(release)
+            override = env.get("DEADLOCK_DIR")
+            check_steam_ready(Path(override) if override else deadlock_dir(steam_roots()))
             subprocess.run([cli, "play", "--watch=false", release], env=env, check=True)
         elif args.action == "probe-build":
             # A separate output per probe permits sequential or isolated parallel engine tests.

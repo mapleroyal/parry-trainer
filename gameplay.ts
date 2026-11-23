@@ -7,8 +7,9 @@ import {
 } from 'modlock'
 import { apply, arena, set } from 'modlock/console'
 import {
-  caughtInParry, clearCaughtOpponents, drawLungeDust, lungeDust, meleeCuesEnabled, parriedOrbit, parriedSparks,
-  prepareAttackerCues, setStockCueVisibility, stockCuesVisible, updateParriedEffects, type ClientAssets, type LungeTrail,
+  billyParticleResources, caughtInParry, clearCaughtOpponents, clearMeleeParticles, drawLungeDust, lungeDust, meleeCuesEnabled, parriedOrbit, parriedSparks,
+  placeStunnedOpponent, prepareAttackerCues, recenterStunContact, setStockCueVisibility, stockCuesVisible,
+  updateParriedEffects, type ClientAssets, type LungeTrail,
 } from './particles'
 import { approachOffset, sampleDistance } from './attack-distance'
 import { meleeRange } from './melee-range.js'
@@ -55,7 +56,7 @@ interface Attacker {
   number: number
   hero: string
   retiring: boolean
-  trail?: LungeTrail
+  trail: LungeTrail
   preparedCues?: boolean
   retryCuesAt?: number
   visibleCues?: boolean
@@ -235,7 +236,7 @@ function populate(team: number): void {
     if (!bot) break
     attackers.push({
       bot, number: i, hero, cadence, retiring: false, entity: 0, phase: 'parked', facing: level,
-      releaseAt: 0, settleAt: 0,
+      releaseAt: 0, settleAt: 0, trail: {},
     })
   }
 }
@@ -292,20 +293,23 @@ function advance(attacker: Attacker, target: Pawn, assets: ClientAssets): void {
     park(attacker)
     attacker.entity = pawn.entity
     attacker.preparedCues = undefined
-    attacker.trail = undefined
+    attacker.trail = {}
     attacker.retryCuesAt = undefined
     attacker.visibleCues = undefined
     conceal(pawn.entity)
     if (!attacker.cadence.wait) scheduleWindup(attacker.cadence)
   }
-  if (assets === 'stock') applyStockCues(attacker, attacker.phase === 'charging' || attacker.phase === 'swinging')
+  if (assets === 'stock') {
+    placeStunnedOpponent(attacker.bot, pawn, target, practiceOrigin)
+    applyStockCues(attacker, attacker.phase === 'charging' || attacker.phase === 'swinging')
+  }
   if (attacker.phase === 'parked' || attacker.phase === 'idle') {
     // Replacing the melee weapon on the same tick as pressing melee costs a
     // tick of movement. Equip the selected cues before the windup begins.
-    if (!attacker.trail || (assets === 'private' && attacker.preparedCues !== meleeCuesEnabled())) {
+    if (!attacker.trail.weapon || attacker.preparedCues !== meleeCuesEnabled()) {
       if (attacker.retryCuesAt && now < attacker.retryCuesAt) return
-      attacker.trail = prepareAttackerCues(attacker.bot, assets)
-      if (attacker.trail) attacker.preparedCues = meleeCuesEnabled()
+      if (prepareAttackerCues(attacker.bot, pawn.entity, assets, attacker.trail))
+        attacker.preparedCues = meleeCuesEnabled()
       else attacker.retryCuesAt = now + 1
       return
     }
@@ -323,7 +327,7 @@ function advance(attacker: Attacker, target: Pawn, assets: ClientAssets): void {
     attack(attacker, target, assets)
     return
   }
-  drawLungeDust(attacker.trail, pawn.position)
+  drawLungeDust(attacker.trail, pawn.position, pawn.entity)
   if (now >= attacker.settleAt) {
     // Stay at the native lunge endpoint, so windup, impact and parry sounds
     // decay at the correct place. This pawn remains invisible and non-solid.
@@ -355,7 +359,7 @@ function recenter(pawn: Pawn): Pawn {
   if (!trainee?.teleport(position, pawn.eyeAngles, pawn.velocity)) return pawn
   moveWaves(dx, dy)
   for (const attacker of attackers) {
-    if (attacker.phase === 'parked') continue
+    if (recenterStunContact(attacker.entity, dx, dy) || attacker.phase === 'parked') continue
     const fighter = attacker.bot.pawn()
     if (fighter) attacker.bot.teleport({
       x: fighter.position.x - dx, y: fighter.position.y - dy, z: fighter.position.z,
@@ -365,6 +369,7 @@ function recenter(pawn: Pawn): Pawn {
 }
 
 function retireAttackers(): void {
+  clearMeleeParticles()
   clearCaughtOpponents()
   for (const a of attackers) {
     if (!a.retiring) {
@@ -449,7 +454,7 @@ export function startGameplay(assets: ClientAssets = 'private', lifecycle?: {
     () => soulPenaltySettings.whiff,
   )
   onStart(() => {
-    precache({ resources: [lungeDust, parriedOrbit, parriedSparks, ...rangeRingResources] })
+    precache({ resources: [lungeDust, ...billyParticleResources, parriedOrbit, parriedSparks, ...rangeRingResources] })
     setRespawnDelay(respawnSeconds)
     // The stock death HUD reads the game's scheduled deadline on the dead pawn.
     set('citadel_player_spawn_time_max_respawn_time', respawnSeconds)
@@ -462,6 +467,7 @@ export function startGameplay(assets: ClientAssets = 'private', lifecycle?: {
   onWorld(() => {
     clearDrainWarning()
     clearRangePreview()
+    clearMeleeParticles()
     clearCaughtOpponents()
     // A map change removes the bots; a mod reload can leave old ones behind.
     for (const c of players()) {
@@ -517,7 +523,11 @@ export function startGameplay(assets: ClientAssets = 'private', lifecycle?: {
     a.outcome = 'parried'
     a.cadence.stunned = { entity: result.attacker, caughtAt: now }
     caughtInParry(result.attacker, now)
-    if (assets === 'stock') applyStockCues(a, false)
+    if (assets === 'stock') {
+      const attacker = a.bot.pawn(), defender = trainee?.pawn()
+      if (attacker && defender) placeStunnedOpponent(a.bot, attacker, defender, practiceOrigin)
+      applyStockCues(a, false)
+    }
     session.parries++
   })
   onDamage(hit => {

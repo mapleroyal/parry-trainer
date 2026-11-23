@@ -1,7 +1,7 @@
 {
   "slug": "parry-trainer",
   "name": "Parry Trainer",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "language": "LANGUAGE_TYPESCRIPT",
   "map": "hl_parry_trainer",
   "description": "Practice real Deadlock heavy melee parries in a black arena. Configure invisible attackers, creep waves, soul goals and timed drills."

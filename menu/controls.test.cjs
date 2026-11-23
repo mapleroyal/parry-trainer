@@ -1643,31 +1643,41 @@ test('the packaged menu uses Modlock score replies through Begin, confirmation a
     assert.equal(restored, 1);
 });
 
-test('native HUD restores stock markers and leaves player parry feedback alone', () => {
-    const hud = vm.createContext({});
+test('native HUD hides the local development frame and restores each panel on unload', () => {
+    let time = 0;
+    const hud = vm.createContext({ Date: { now: () => time } });
     vm.runInContext(fs.readFileSync(path.join(__dirname, '../native/retail-hud.js'), 'utf8'), hud);
     const panel = () => ({ style: {}, IsValid: () => true });
     const units = panel(), badge = { ...panel(), BHasClass: c => c === 'Stunned' };
     const player = { ...panel(), BHasClass: () => false };
     const indicators = { ...panel(), Children: () => [badge, player] };
-    const damage = panel();
+    const damage = panel(), frame = panel(), trainer = panel();
     damage.style.visibility = 'visible';
-    const lookup = { unit_indicators_v2: units, HudEventIndicatorsPanel: indicators, damage_impact: damage };
+    const lookup = { unit_indicators_v2: units, HudEventIndicatorsPanel: indicators, damage_impact: damage,
+        ModlockUi_modlock: frame, ModlockUi_parry_trainer: trainer };
     const game = { ...panel(), FindChildTraverse: id => lookup[id] };
     let tick, canceled, enabled = new Set();
     hud.$ = { Schedule: (_, cb) => { tick = cb; return 1; }, CancelScheduled: id => { canceled = id; } };
     hud.ParryTrainerIsActive = () => true;
     hud.ParryTrainerPreset = { get: key => enabled.has(key) };
     const restore = hud.ParryTrainerGuardRetailHud(game);
+    assert.equal(frame.style.visibility, 'collapse');
+    assert.equal(trainer.style.visibility, undefined);
     assert.equal(damage.style.visibility, 'collapse');
     assert.equal(units.style.visibility, 'collapse');
     assert.equal(badge.style.visibility, 'collapse');
     assert.equal(player.style.visibility, undefined);
+    const replacement = panel();
+    lookup.ModlockUi_modlock = replacement;
+    time += 1000;
     enabled = new Set(['parried', 'troopers']);
     tick();
+    assert.equal(replacement.style.visibility, 'collapse');
+    assert.equal(frame.style.visibility, null);
     assert.equal(badge.style.visibility, null);
     assert.equal(units.style.visibility, null);
     restore();
+    assert.equal(replacement.style.visibility, null);
     assert.equal(damage.style.visibility, 'visible');
     assert.equal(canceled, 1);
 });

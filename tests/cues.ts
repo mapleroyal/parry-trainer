@@ -4,6 +4,7 @@ import {
 } from 'modlock'
 import { setMeleeDistances, testSubject } from '../gameplay'
 import { lungeDust, setMeleeCues, type ClientAssets } from '../particles'
+import { quietMeleeFor } from '../native/quiet-melee'
 
 // Check both same-hero weapons and the native particle actually emitted along
 // the lunge. The quiet attacks bracket a visible one at maximum separation.
@@ -50,14 +51,18 @@ export default function registerCuesProbe(assets: ClientAssets = 'private'): voi
     const theirs = swing.attackerPlayer.abilities(), ours = subject.abilities()
     for (const [slot, name] of [[22, stock], [18, 'citadel_ability_sprint']] as const) {
       const actual = theirs.find(a => a.slot === slot)?.name
-      if (ours.find(a => a.slot === slot)?.name !== name || actual !== (assets === 'stock' || swings === 1 ? name : 'parry_trainer_quiet_' + name)) {
+      const hidden = assets === 'private' ? 'parry_trainer_quiet_' + name :
+        slot === 22 ? quietMeleeFor(name) : name
+      if (ours.find(a => a.slot === slot)?.name !== name || actual !== (swings === 1 ? name : hidden)) {
         finish(false, 'incorrect melee or sprint for slot ' + slot + ', opponent had ' + actual)
         return
       }
     }
     if (assets === 'stock' && (!modifierState(swing.attacker, 'MODIFIER_STATE_DO_NOT_DRAW_MODEL') ||
         modifierState(swing.attacker, 'MODIFIER_STATE_INVISIBLE_TO_ENEMY') !== (swings !== 1) ||
-        modifierState(swing.attacker, 'MODIFIER_STATE_DO_NOT_DRAW_PARTICLES') !== (swings !== 1))) {
+        modifierState(swing.attacker, 'MODIFIER_STATE_DO_NOT_DRAW_PARTICLES') !== (swings !== 1) ||
+        modifierState(swing.attacker, 'MODIFIER_STATE_SPRINT_DISABLED') !== (swings !== 1) ||
+        modifierState(subject.pawn()!.entity, 'MODIFIER_STATE_SPRINT_DISABLED'))) {
       finish(false, 'incorrect opponent visibility states on swing ' + (swings + 1))
       return
     }

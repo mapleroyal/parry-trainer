@@ -134,6 +134,14 @@ export default function registerParriedProbe(assets: ClientAssets = 'private'): 
       finish(false, 'incorrect opponent visibility states during parry ' + (phase + 1))
       return
     }
+    if (assets === 'stock') {
+      const defender = subject.pawn()!
+      const dx = target.position.x - defender.position.x, dy = target.position.y - defender.position.y
+      const yaw = defender.cameraAngles.yaw * Math.PI / 180
+      const inPlace = expected[phase] ? Math.hypot(dx, dy) < 400 :
+        dx * Math.cos(yaw) + dy * Math.sin(yaw) < -2400
+      if (!inPlace) { finish(false, 'native stunned pawn in the wrong place on catch ' + (phase + 1)); return }
+    }
     if (weapon.name.startsWith('parry_trainer_quiet_') !== (assets === 'private' && phase < 2)) {
       finish(false, 'opponent melee cues followed the parried toggle'); return
     }
