@@ -12,6 +12,26 @@ The Hyperline listing is pending publication. You can play the prerelease locall
 
 To run from a source checkout, use `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
 
+## Screenshots
+
+![Sinclair parries an incoming heavy melee with eight seconds left on the session timer.](docs/screenshots/timed-parry.webp)
+
+*Sinclair parries a fourth heavy melee with eight seconds left on the timer.*
+
+| Session | Opponents |
+| --- | --- |
+| <a href="docs/screenshots/session.webp"><img src="docs/screenshots/session.webp" width="430" alt="A 25-second timer selected in Session, with both loss conditions off."></a> | <a href="docs/screenshots/opponents.webp"><img src="docs/screenshots/opponents.webp" width="430" alt="Opponent settings showing the minimum, favored and maximum melee distance and interval."></a> |
+
+| Creeps | Templates |
+| --- | --- |
+| <a href="docs/screenshots/creeps.webp"><img src="docs/screenshots/creeps.webp" width="430" alt="Two lane troopers set to chase and attack, alongside a tier II neutral camp."></a> | <a href="docs/screenshots/templates.webp"><img src="docs/screenshots/templates.webp" width="430" alt="A preview of the Harder template before applying it."></a> |
+
+| Victorious | Final scorecard |
+| --- | --- |
+| <a href="docs/screenshots/victorious.webp"><img src="docs/screenshots/victorious.webp" width="430" alt="The gold Victorious splash as the timer expires."></a> | <a href="docs/screenshots/scorecard.webp"><img src="docs/screenshots/scorecard.webp" width="430" alt="Post-session scorecard with parry, damage and soul statistics."></a> |
+
+## Training
+
 You enter a quiet arena with a randomly selected hero. Press the scoreboard key (Tab by default) to open **Session**. Between sessions, press it again to close the menu. Choose your rules, then select **Begin session**. During the countdown and practice, hold the scoreboard key to open the menu and release it to aim. Escape also closes the menu, including while typing a save name. With the tab strip focused, Left and Right move between tabs.
 
 The **Templates** tab, just before **Score**, offers built-in configurations. Move the slider from **Easiest** to **Hardest** to preview a template, then choose **Apply**. Use **Saved** for drills you create yourself. **My hero** controls cooldowns, stamina, health and leveling. **Opponents** controls the hidden attackers and their cues. **Creeps** controls lane troopers and neutral camps. To switch your own hero, use Deadlock’s **Escape → Swap Hero**, including during a session.
