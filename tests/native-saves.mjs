@@ -53,154 +53,58 @@ test('an over-capacity save is rejected and every accepted field respects UTF-8 
   assert.throws(() => unpackTrainerDocument('[1,1,[],["X"],0,[]]'))
 })
 const file = (path) => fs.readFileSync(new URL('../' + path, import.meta.url), 'utf8')
-function transfers(initial, includeDrop) {
-  const callbacks = [],
-    routes = {},
-    panels = new Map(),
-    labels = {},
-    messages = []
-  const panel = (id) => {
-    if (!panels.has(id)) panels.set(id, { text: '', SetHasClass() {} })
-    return panels.get(id)
-  }
-  const root = { FindChildTraverse: panel },
-    player = {},
-    state = { view: 'main', section: 'backups' }
-  let time = 0,
-    dropped = false,
-    max = 0,
-    current = initial,
-    loaded = 0
-  const schedule = (delay, fn) => callbacks.push({ time: time + delay, fn })
-  const server = vm.createContext({
-    session: { phase: 'ready' },
-    nativeBackupAvailable: () => true,
-    exportTrainerData: () => JSON.stringify(current),
-    packTrainerDocument,
-    unpackTrainerDocument,
-    settingsSnapshot: () => current.settings,
-    route(_, name, value) {
-      schedule(0.02, () => routes[name]?.(value))
-      return true
-    },
-    importNativeDocument(p, data, done) {
-      schedule(0.18, () => {
-        current = JSON.parse(data)
-        loaded++
-        done('Imported.', true)
-      })
-    },
+
+// Drive the same typed tree the game sees, without opening the installed game.
+function backupsView() {
+  const player = { slot: 2, pawn: () => undefined }
+  const committed = []
+  let tree
+  const node = (kind, props = {}) => ({ kind, ...props })
+  const api = vm.createContext({
+    heroes: [], jsx: node, show(_, children) { tree = children }, simulationTime: () => 0,
+    session: { phase: 'ready' }, soulStats: () => ({}), scoreFields: () => ({}),
+    settingsSnapshot: () => reference.settings, characterFields: () => ({}),
+    characterChanging: () => false, nativeStorageLoading: () => false,
+    nativeLibraryStatus: () => ({ ready: true }), nativeBackupAvailable: () => true,
+    arenaHud: () => null, closeButton: () => null, palette: {},
+    column: (children) => node('panel', { children }), row: (children) => node('panel', { children }),
+    heading: (text) => node('label', { text }), note: (text) => node('label', { text }),
+    button: (text, onPress) => node('button', { text, onPress }),
+    exportTrainerData: () => JSON.stringify(reference),
+    backupProblem: (raw) => raw === '{}' ? 'Invalid backup' : undefined,
+    importNativeDocument: (owner, raw, done) => { committed.push({ owner, raw }); done('Imported.') },
   })
-  vm.runInContext(
-    stripTypeScriptTypes(
-      file('native/backup.ts')
-        .replace(/^import .*$/gm, '')
-        .replace(/^export /gm, ''),
-    ),
-    server,
-  )
-  const ui = vm.createContext({
-    $: { Schedule: schedule },
-    ParryTrainerRoot: () => root,
-    ParryTrainerCanProfile: () => true,
-    ParryTrainerProfiles: state,
-    ParryTrainerText(r, id, msg) {
-      labels[id] = msg
-      messages.push(msg)
-    },
-    ParryTrainerProfileOverview() {
-      state.view = 'main'
-    },
-    ParryTrainerProfileView(view, action) {
-      Object.assign(state, { view, action })
-    },
-    ParryTrainerSetSettingsReady() {},
-    ParryTrainerInvalidateScore() {},
-    packTrainerDocument,
-    unpackTrainerDocument,
-    recordParts,
-    Modlock: {
-      route(name, fn) {
-        routes[name] = fn
-      },
-      onUnload() {},
-      press(name, packet) {
-        const bytes = Buffer.byteLength(JSON.stringify(packet))
-        max = Math.max(max, bytes)
-        assert.ok(bytes <= 180)
-        if (includeDrop && !dropped && packet[0] === 'put' && packet[2] !== 0) {
-          dropped = true
-          return true
-        }
-        schedule(0.02, () => server.nativeBackupAction(player, packet))
-        return true
-      },
-    },
-  })
-  vm.runInContext(file('native/backup-client.js'), ui)
-  ui.ParryTrainerNativeBackupInitialize(root)
-  return {
-    ui,
-    panel,
-    labels,
-    messages,
-    get current() {
-      return current
-    },
-    get loaded() {
-      return loaded
-    },
-    get max() {
-      return max
-    },
-    get dropped() {
-      return dropped
-    },
-    run() {
-      for (let i = 0; callbacks.length && i < 5000; i++) {
-        callbacks.sort((a, b) => a.time - b.time)
-        const next = callbacks.shift()
-        time = next.time
-        next.fn()
-      }
-      assert.equal(callbacks.length, 0)
-    },
+  const source = file('native/interface.ts').replace(/^import .*$/gm, '').replace(/^export /gm, '')
+  vm.runInContext(stripTypeScriptTypes(source), api)
+  const view = vm.runInContext('TrainerInterface', api)
+  new view(player).preview('Saved', 'Backups')
+  function find(kind, text) {
+    const walk = (value) => Array.isArray(value) ? value.flatMap(walk) : value?.kind ? [value, ...walk(value.children)] : []
+    return walk(tree).find((item) => item.kind === kind && (text === undefined || item.text === text))
   }
+  return { committed, find, player }
 }
-test('portable backup exports readable JSON and imports only after confirmation, even with a dropped action', () => {
-  const stub = transfers(reference, true),
-    entry = stub.panel('ParryTrainerBackupText')
-  stub.ui.ParryTrainerNativeBackupRequest('export')
-  stub.run()
-  assert.deepEqual(JSON.parse(entry.text), reference)
-  assert.match(stub.labels.ParryTrainerBackupFeedback, /text field/)
-  const changed = structuredClone(reference)
-  changed.profiles[0].name = '⚒️🪄「\u0022🌹\u0022」'
-  changed.settings += ',timer=333'
-  entry.text = JSON.stringify(changed)
-  stub.ui.ParryTrainerNativeBackupRequest('import')
-  assert.equal(stub.loaded, 0)
-  assert.equal(stub.ui.ParryTrainerNativeBackupProceed(), true)
-  stub.run()
-  assert.ok(stub.dropped)
-  assert.ok(stub.max <= 180)
-  assert.equal(stub.loaded, 1)
-  assert.deepEqual(stub.current, changed)
-  assert.equal(stub.labels.ParryTrainerBackupFeedback, 'Imported.')
+
+test('typed backups export plain text and replace data only after current-player confirmation', () => {
+  const { committed, find, player } = backupsView()
+  find('button', 'Export backup').onPress()
+  assert.deepEqual(JSON.parse(find('documentOutput').text), reference)
+  const raw = JSON.stringify({ ...reference, profiles: [{ id: 1, name: '雪🌿', settings: reference.settings }] })
+  const form = find('documentInput')
+  form.onSubmit({ slot: 8 }, raw)
+  assert.equal(find('button', 'Confirm'), undefined)
+  form.onSubmit(player, '{}')
+  assert.ok(find('label', 'Invalid backup'))
+  form.onSubmit(player, raw)
+  assert.equal(committed.length, 0)
+  find('button', 'Cancel').onPress()
+  assert.equal(committed.length, 0)
+  find('documentInput').onSubmit(player, raw)
+  const confirm = find('button', 'Confirm')
+  confirm.onPress()
+  confirm.onPress()
+  assert.deepEqual(committed, [{ owner: player, raw }])
 })
-
-
-test('the renamed trainer imports a backup exported under its previous name', () => {
-  const stub = transfers(reference, false)
-  const entry = stub.panel('ParryTrainerBackupText')
-  entry.text = JSON.stringify({ ...reference, format: 'parry-void' })
-  stub.ui.ParryTrainerNativeBackupRequest('import')
-  assert.equal(stub.ui.ParryTrainerNativeBackupProceed(), true)
-  stub.run()
-  assert.equal(stub.loaded, 1)
-  assert.deepEqual(stub.current, reference)
-})
-
 function accountService() {
   let read,
     tick,
@@ -256,9 +160,6 @@ function accountService() {
         return JSON.parse(raw)
       } catch {}
     },
-    profiles() {
-      return local.profiles
-    },
     unavailableLibrary() {
       return false
     },
@@ -301,6 +202,9 @@ function accountService() {
     get settings() {
       return timePrefs
     },
+    get library() {
+      return local.profiles
+    },
   }
 }
 
@@ -310,7 +214,7 @@ test('delayed account reads never overwrite a temporary session or the existing 
   assert.equal(s.poll(), 0.15)
   s.poll(81)
   assert.equal(s.api.nativeStorageLoading(), false)
-  assert.equal(s.api.nativeScoreStorage({}, true).SettingsSaveError, 'offline')
+  assert.equal(s.api.nativeLibraryStatus().ready, false)
   const temporary = reference.settings + ',timer=557'
   assert.equal(s.edit(temporary), false)
   s.api.retryNativeSave()
@@ -320,7 +224,7 @@ test('delayed account reads never overwrite a temporary session or the existing 
   s.poll(2)
   assert.equal(s.settings, temporary)
   assert.equal(s.calls.length, 0)
-  assert.equal(JSON.parse(s.api.nativeScoreStorage({}, true).ProfileList).length, 3)
+  assert.equal(JSON.stringify(s.library), JSON.stringify(reference.profiles))
   s.api.retryNativeSave()
   assert.equal(JSON.parse(s.calls[0]).settings, temporary)
   assert.deepEqual(JSON.parse(s.calls[0]).profiles, reference.profiles)
@@ -338,7 +242,7 @@ test('cloud updates serialize and retry the latest snapshot, and old account ack
   assert.equal(s.calls.length, 2)
   assert.equal(JSON.parse(s.calls[1]).settings, reference.settings + ',timer=702')
   s.receipt(false)
-  assert.equal(s.api.nativeScoreStorage({}, true).SettingsSaveError, 'write')
+  assert.equal(s.api.nativeLibraryStatus().retry, true)
   s.api.retryNativeSave()
   assert.equal(s.calls[1], s.calls[2])
   s.api.closeNativeStorage()
@@ -362,7 +266,7 @@ test('cloud import changes live gameplay only after acknowledgement; an ambiguou
   s.receipt(false)
   assert.deepEqual(replies, [false])
   assert.equal(s.settings, reference.settings)
-  assert.equal(s.api.nativeScoreStorage({}, true).SettingsSaveError, 'offline')
+  assert.equal(s.api.nativeLibraryStatus().ready, false)
   s.api.retryNativeSave()
   assert.equal(s.poll(), 0.15)
   s.loaded()

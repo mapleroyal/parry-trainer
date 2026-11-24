@@ -1,4 +1,0 @@
-<root>
-  <scripts><include src="file://{resources}/scripts/parry_trainer_drain_signal.js" /></scripts>
-  <Panel hittest="false" hittestchildren="false" onload="ParryTrainerInitDrainSignal()" />
-</root>
