@@ -40,11 +40,10 @@
     m_surfacePropertyHashes = [ 1977497166 ]
     m_collisionAttributes = [{
         m_nIncludeDetailLayerCount = 0
-        // Retail uses this collision group to exclude gun projectiles from solid geometry.
-        m_CollisionGroup = 4258586587
-        m_InteractAs = [3432399841] m_InteractWith = [] m_InteractExclude = [1178079453] m_DetailLayers = []
-        m_CollisionGroupString = "ConditionallySolid"
-        m_InteractAsStrings = ["solid"] m_InteractWithStrings = [] m_InteractExcludeStrings = ["Citadel_Bullet"] m_DetailLayerStrings = []
+        m_CollisionGroup = 1977497166
+        m_InteractAs = [] m_InteractWith = [] m_InteractExclude = [] m_DetailLayers = []
+        m_CollisionGroupString = "Default"
+        m_InteractAsStrings = [] m_InteractWithStrings = [] m_InteractExcludeStrings = [] m_DetailLayerStrings = []
     }]
     m_debugPartNames = [] m_embeddedKeyvalues = ""
 }

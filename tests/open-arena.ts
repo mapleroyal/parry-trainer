@@ -1,91 +1,132 @@
-// The arena floor must support heroes while a real projectile can fly through it.
+// Check stock gunfire at spawn, while strafing, and across the horizontal arena and its floor.
 import { addBot, Buttons, createModel, Layers, log, onDamage, onFrame, onModifierEvent, onStart, precache,
-  serverCommand, trace, vector, writeField, type Player, type WorldObject } from 'modlock'
+  serverCommand, trace, vector, writeField, type Player, type Vector, type WorldObject } from 'modlock'
 
 const crate = 'models/props_gameplay/wooden_crate_01.vmdl'
-const farTarget = { x: 4400, y: 0, z: 90 }
-const lowTarget = { x: 650, y: 0, z: -150 }
+const bulletSpeed = 22500 // Wraith's stock primary, Source units per second.
+const bearings = [0, 45, 90, 135, 180, 225, 270, 315]
+type Stage = 'air' | 'up' | 'near' | 'far' | 'shallow' | 'steep'
 
 export default function register(): void {
-  let shooter: Player | undefined, target: WorldObject | undefined, targetId: number | undefined
-  let since = -1, ready = -1, now = 0, done = false, stage = 0
-  let fired = -1, removed = -1, touched = false, lowerWitness = false
-  let quitAt = -1
-  function finish(ok: boolean, why: string): void {
+  let shooter: Player | undefined, witness: WorldObject | undefined
+  let start = -1, ready = -1, now = 0, quitAt = -1, done = false
+  let stage: Stage = 'air', airShots = 0, airTravel = 0
+  let fired = -1, removed = -1, hitEntity = false, hitWitness = false
+  let aimPoint: Vector | undefined, expectedFloorFlight = 0, shallowFlight = 0, attempts = 0
+  function finish(ok: boolean, detail: string): void {
     done = true
-    log('PARRY TRAINER PROBE ' + (ok ? 'PASS' : 'FAIL'), 'open-arena', why)
+    log('PARRY TRAINER PROBE ' + (ok ? 'PASS' : 'FAIL'), 'open-arena', detail)
+  }
+  function arm(): void {
+    fired = removed = -1
+    hitEntity = hitWitness = false
+    ready = now + 0.25
   }
   onStart(() => precache({ resources: [crate], heroes: ['hero_wraith'] }))
-  for (const kind of ['CREATED', 'HIT', 'REMOVED']) onModifierEvent('MODIFIER_EVENT_BULLET_' + kind, event => {
-    if (stage !== 0 || event.caster !== shooter?.pawn()?.entity) return
+  for (const kind of ['CREATED', 'HIT', 'REMOVED']) onModifierEvent('MODIFIER_EVENT_BULLET_' + kind, e => {
+    if (done || e.caster !== shooter?.pawn()?.entity) return
     if (kind === 'CREATED' && fired < 0) fired = now
-    if (kind === 'HIT') touched = true
-    if (kind === 'REMOVED' && removed < 0) removed = now
+    if (kind === 'HIT' && e.target) hitEntity = true
+    if (kind === 'REMOVED' && fired >= 0 && removed < 0) removed = now
   })
   onDamage(hit => {
-    if (!done && hit.victim === targetId && hit.attacker === shooter?.pawn()?.entity) {
-      const pawn = shooter!.pawn()!
-      if (stage === 1) {
-        stage = 2
-        lowerWitness = true
-      } else if (stage === 2) {
-        finish(pawn.position.z >= -2 && pawn.position.z <= 10,
-          'level air miss cleared; 112 m distant and below-floor witnesses hit by live rounds; standing z=' + pawn.position.z)
-      }
+    if (!done && witness && hit.victim === witness.entity() && hit.attacker === shooter?.pawn()?.entity) {
+      hitWitness = true
       return { block: true }
     }
   })
   onFrame(({ timeSeconds }) => {
     now = timeSeconds
     if (done) {
-      // The engine may still be applying a hit when finish runs. Retire the
-      // witnesses on a subsequent frame and let the bot disconnect before quit.
       if (quitAt < 0) {
-        target?.remove()
+        witness?.remove()
         shooter?.removeBot()
         quitAt = now + 0.4
       } else if (now >= quitAt) serverCommand('quit')
       return
     }
-    if (lowerWitness) {
-      lowerWitness = false
-      target?.move({ ...lowTarget, z: lowTarget.z - 64 })
-      ready = now + 0.4
-    }
-    if (since < 0) since = now
-    if (now - since > 15) { finish(false, 'waiting for stage ' + stage + ' fired=' + fired + ' removed=' + removed); return }
+    if (start < 0) start = now
+    if (now - start > 24) { finish(false, 'timed out at ' + stage + ', bearing ' + airShots); return }
     shooter ??= addBot({ name: 'Arena tester', team: 2, hero: 'hero_wraith' })
     const pawn = shooter?.pawn()
     if (!shooter || !pawn?.hero) return
     if (ready < 0) {
-      const start = { x: 0, y: 0, z: 75 }
-      for (let i = 0; i < 8; i++) {
-        const angle = i * Math.PI / 4
-        const end = { x: 7000 * Math.cos(angle), y: 7000 * Math.sin(angle), z: start.z }
-        if (trace({ start, end, layers: Layers.solid | Layers.hitbox, ignore: [pawn.entity] })) {
-          finish(false, 'level shot obstructed, bearing ' + i * 45); return
-        }
-      }
-      const floor = trace({ start: { x: 250, y: 0, z: 200 }, end: { x: 250, y: 0, z: -200 },
-        layers: Layers.solid | Layers.playerClip })
-      if (!floor || Math.abs(floor.position.z) > 0.5) { finish(false, 'missing movement floor'); return }
-      target = createModel({ resource: crate, position: { ...farTarget, z: farTarget.z - 64 }, scale: 2, solid: true })
-      targetId = target?.entity()
-      if (!targetId || !writeField(targetId, 'CBaseEntity', 'm_bTakesDamage', 'bool', true)) {
-        finish(false, 'failed to prepare projectile witness'); return
-      }
       shooter.teleport({ x: 0, y: 0, z: 3 }, vector.level(0))
-      ready = now + 0.4
+      arm()
+      return
     }
-    if (now < ready) return
-    if (stage === 0 && removed >= 0) {
-      const life = removed - fired
-      if (touched || life < 0.12) { finish(false, 'early or solid open-air endpoint: ' + life); return }
-      log('unobstructed Wraith miss, seconds in flight', life)
-      stage = 1
+    if (removed >= 0) {
+      const flight = removed - fired
+      if (stage === 'up') {
+        if (hitEntity || flight < 0.28 || flight > 0.35) { finish(false, 'upward shot obstructed'); return }
+        stage = 'near'
+      } else if (stage === 'air') {
+        if (hitEntity || flight < 0.28 || flight > 0.35) {
+          finish(false, 'short or obstructed air shot at ' + bearings[airShots] + ' degrees, flight=' + flight); return
+        }
+        airTravel = Math.max(airTravel, Math.hypot(pawn.position.x, pawn.position.y))
+        airShots++
+        if (airShots === bearings.length) {
+          if (airTravel < 100) { finish(false, 'shooter did not leave spawn while firing'); return }
+          stage = 'up'
+        }
+      } else if (stage === 'shallow' || stage === 'steep') {
+        // A world impact can report a null target. Compare its flight time with
+        // the ray to the floor and verify that it did not reach the buried prop.
+        log(stage, 'floor at metres', (expectedFloorFlight * bulletSpeed * 0.0254).toFixed(2),
+          'stock bullet flight', flight, 'seconds; buried witness hit', hitWitness)
+        if (hitWitness || Math.abs(flight - expectedFloorFlight) >= 0.035) {
+          finish(false, stage + ' shot failed to stop at the floor'); return
+        }
+        if (stage === 'steep') {
+          finish(flight < shallowFlight - 0.025 && pawn.position.z >= -2 && pawn.position.z < 5,
+            'eight level bearings, upward miss, strafed ' + Math.round(airTravel) + ' units; ' +
+            '9 m and 112 m targets hit; downward shots stopped at shallow and steep floor intersections')
+          return
+        }
+        shallowFlight = flight
+        stage = 'steep'
+      } else if (hitWitness) {
+        stage = stage === 'near' ? 'far' : 'shallow'
+        attempts = 0
+      } else if (++attempts >= 6) {
+        finish(false, 'rounds failed to reach ' + stage + ' witness'); return
+      }
+      aimPoint = undefined
+      arm()
     }
-    const shoot = stage !== 0 || fired < 0
-    const facing = stage === 0 ? vector.level(95) : vector.aimAt(pawn.eyePosition, stage === 1 ? farTarget : lowTarget)
-    shooter.drive({ facing, forward: 0, left: 0, held: shoot ? Buttons.attack : 0n, pressed: shoot ? Buttons.attack : 0n })
+
+    if (stage !== 'air' && stage !== 'up' && !aimPoint) {
+      const eye = pawn.eyePosition
+      if (stage === 'near') aimPoint = { x: eye.x - 360, y: eye.y, z: eye.z }
+      else if (stage === 'far') aimPoint = { x: eye.x, y: eye.y + 4400, z: eye.z }
+      else aimPoint = { x: eye.x + (stage === 'steep' ? eye.z + 110 : 4300), y: eye.y, z: -110 }
+      const origin = { ...aimPoint, z: aimPoint.z - 64 }
+      if (!witness) {
+        witness = createModel({ resource: crate, position: origin, scale: 2, solid: true })
+        const id = witness?.entity()
+        if (!id || !writeField(id, 'CBaseEntity', 'm_bTakesDamage', 'bool', true)) {
+          finish(false, 'could not prepare impact witness'); return
+        }
+      } else if (!witness.move(origin)) { finish(false, 'could not move impact witness'); return }
+    }
+    const eye = pawn.eyePosition
+    const facing = aimPoint ? vector.aimAt(eye, aimPoint) :
+      stage === 'up' ? { yaw: 0, pitch: -45, roll: 0 } : vector.level(bearings[airShots])
+    const fire = now >= ready && fired < 0
+    if (fire && (stage === 'shallow' || stage === 'steep')) {
+      const hit = trace({ start: eye, end: aimPoint!, layers: Layers.solid, ignore: [pawn.entity] })
+      if (!hit || Math.abs(hit.position.z) > 0.5 || hit.normal.z < 0.99) {
+        finish(false, 'ray to submerged witness did not reach the flat floor'); return
+      }
+      expectedFloorFlight = vector.distance(eye, hit.position) / bulletSpeed
+      if (stage === 'steep' ? expectedFloorFlight >= 0.01 : expectedFloorFlight < 0.045 || expectedFloorFlight > 0.15) {
+        finish(false, 'unexpected eye-to-floor distance'); return
+      }
+    }
+    const keys = fire ? Buttons.attack : 0n
+    // Fire the first level shot from rest, then turn and strafe through seven
+    // other headings. Stop before the measured witness and floor shots.
+    shooter.drive({ facing, forward: 0, left: stage === 'air' && airShots > 0 ? 1 : 0, held: keys, pressed: keys })
   })
 }
