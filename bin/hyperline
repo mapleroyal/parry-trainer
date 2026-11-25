@@ -17,7 +17,7 @@ from steam_ready import check_steam_ready, deadlock_dir, steam_roots
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "native"
 STATE = ROOT / ".runtime/hyperline"
-VERSION = "v0.1.106"
+VERSION = "v0.1.112"
 
 
 def tool():

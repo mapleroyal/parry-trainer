@@ -4,9 +4,9 @@ A solo Deadlock training mode for Windows and Linux. Stand still, run, shoot or 
 
 ## Play
 
-Parry Trainer 0.4.2 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106).
+Parry Trainer 0.4.3 is available for local play while Hyperline publication is pending. Play on Windows or Linux with Steam, Deadlock and [Modlock v0.1.112](https://github.com/paralin/modlock/releases/tag/v0.1.112).
 
-1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.2-hyperline.zip) and extract it into a fresh folder.
+1. Download the [trainer ZIP](https://github.com/mapleroyal/parry-trainer/raw/refs/heads/main/dist/parry-trainer-0.4.3-hyperline.zip) and extract it into a fresh folder.
 2. Close Deadlock and finish any queued Deadlock update in Steam Downloads. Leave Steam running. The local host and game share files, so applying a patch during practice can disconnect you.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
@@ -103,11 +103,11 @@ Standing-still damage is off at Easiest. It starts at 15% of maximum health per 
 
 Easiest spaces windups 5–6 seconds apart and favors 5.75 seconds. Hardest narrows the interval to 1–2 seconds and favors 1.25 seconds. When the limits differ, each exact endpoint occurs roughly once in forty rolls. A stunned opponent still has to recover before starting another windup.
 
-The arena recenters you before you can reach its edges and carries your height, facing, velocity, and any attacking opponents along. The score page tallies incoming heavy swings, parries and hits, plus souls secured and missed separately for troopers and camps.
+The arena recenters you before you can reach its edges and carries your height, facing, velocity, and any attacking opponents along. The invisible floor supports movement and lets bullets pass through it. A missed shot can travel to your weapon’s normal range. The score page tallies incoming heavy swings, parries and hits, plus souls secured and missed separately for troopers and camps.
 
 ## Build the Hyperline release
 
-Install [Modlock v0.1.106](https://github.com/paralin/modlock/releases/tag/v0.1.106) and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
+Install [Modlock v0.1.112](https://github.com/paralin/modlock/releases/tag/v0.1.112) and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
 
 ```sh
 bin/hyperline build
@@ -120,7 +120,7 @@ The first command writes the mod-only ZIP in `dist/`. It includes the compiled g
 
 To run the HUD and gameplay-state tests with Node 24 or later, use `node --test tests/*.mjs menu/*.test.cjs`.
 
-For a dedicated-server check, `bin/hyperline probe-build cues` builds the stock-melee probe in `.runtime/hyperline/probes/cues`. Run the pinned CLI with `modlock play --no-game --watch=false .runtime/hyperline/probes/cues` and look for `PARRY TRAINER PROBE PASS`. The `quiet-melee` probe checks weapon selection and restoration across the playable roster. The `session`, `tracking`, `melee-distance`, `parried`, `respawn` and `hero` probes use the same workflow. Run these engine checks with the game closed.
+For a dedicated-server check, `bin/hyperline probe-build cues` builds the stock-melee probe in `.runtime/hyperline/probes/cues`. Run the pinned CLI with `modlock play --no-game --watch=false .runtime/hyperline/probes/cues` and look for `PARRY TRAINER PROBE PASS`. The `quiet-melee` probe checks weapon selection and restoration across the playable roster. The `open-arena` probe checks the floor and long-range bullet travel. The `session`, `tracking`, `melee-distance`, `parried`, `respawn` and `hero` probes use the same workflow. Run these engine checks with the game closed.
 
 To check the visuals after a Deadlock update, open the built mod with the stock CLI. Fix the melee distance at maximum and the interval at one second. Compare each effects switch off and on. Check the first frame of a successful parry for the stun label and the following windup for any lingering glow on the opponent. The client draws some effects that a dedicated-server test cannot see.
 
