@@ -10,7 +10,7 @@ Parry Trainer 0.4.4 is available for local play while Hyperline publication is p
 2. Close Deadlock and finish any queued Deadlock update in Steam Downloads. Leave Steam running. The local host and game share files, so applying a patch during practice can disconnect you.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
-The ZIP above is the last packaged build. To try the script-free source version, set `MODLOCK_CLI` and `MODLOCK_HOST` to matching builds with the [typed menu and document controls](https://github.com/paralin/modlock/pull/184). Then run `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
+The ZIP above is the last packaged build. To try the script-free source version, install [Modlock v0.1.116](https://github.com/paralin/modlock/releases/tag/v0.1.116) or later, which has the typed menu and document controls. Then run `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
 
 ## Release screenshots
 
@@ -109,7 +109,7 @@ The arena recenters you before you can reach its edges and carries your height, 
 
 ## Build the Hyperline release
 
-Install a matching Modlock CLI and host with typed menus and document controls, and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
+Install Modlock v0.1.116 or later, which has typed menus and document controls, and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
 
 ```sh
 bin/hyperline build

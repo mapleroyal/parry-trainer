@@ -22,7 +22,7 @@ def tool():
     override = os.environ.get("MODLOCK_CLI")
     cli = override or shutil.which("modlock") or STATE / ("modlock.exe" if os.name == "nt" else "modlock")
     if not Path(cli).is_file():
-        raise ValueError("Install a Modlock CLI with typed menus and document controls, or set MODLOCK_CLI to a matching development build.")
+        raise ValueError("Install Modlock v0.1.116 or later, or set MODLOCK_CLI to its modlock command line.")
     return cli
 
 

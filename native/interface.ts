@@ -1,4 +1,4 @@
-import { heroes, jsx, show, type Child, type Player } from 'modlock'
+import { heroes, jsx, show, type Child, type DocumentFailure, type Player } from 'modlock'
 import { characterAction, characterChanging, characterFields } from '../character'
 import { beginTraining, simulationTime, stopTraining, waveSettings } from '../gameplay'
 import { presetValues } from '../difficulty-settings.js'
@@ -25,6 +25,16 @@ const plate = { width: '100%', background: palette.plate, borderColor: palette.b
 const half = { width: 392, margin: [0, 12, 0, 0] } as const
 
 /** TrainerInterface projects one trainee's live practice and library into typed nodes. */
+/** importFailure says why a pasted backup did not arrive; a cancel needs no message. */
+function importFailure(failure?: DocumentFailure): string | undefined {
+  switch (failure) {
+    case 'cancelled': return undefined
+    case 'tooLarge': return 'That backup is too large to import.'
+    case 'expired': return 'The backup took too long to arrive. Paste it again.'
+    default: return 'The backup did not arrive. Paste it again.'
+  }
+}
+
 export class TrainerInterface {
   draining = false
   private page: typeof pages[number] = 'Session'
@@ -353,6 +363,12 @@ export class TrainerInterface {
           this.ask('Replace your settings, drills and hero builds?', () => {
             if (!this.active) importNativeDocument(this.player, raw, message => { this.message = message; this.refresh() })
           })
+        },
+        onFailure: (player: Player, failure?: DocumentFailure) => {
+          const message = importFailure(failure)
+          if (player.slot !== this.player.slot || !message) return
+          this.message = message
+          this.refresh()
         },
       }, 'import'),
     ])
