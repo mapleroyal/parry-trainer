@@ -3,7 +3,7 @@ import { resetCharacterSession } from '../character'
 import { resetTraining } from '../gameplay'
 import { session } from '../session'
 import { applyConfiguration, settingsSnapshot } from '../trainer-settings'
-import { attachTrainerDocument, parseTrainerDocument, profiles, saveConfiguration, unavailableLibrary } from '../trainer-store'
+import { attachTrainerDocument, parseTrainerDocument, saveConfiguration, unavailableLibrary } from '../trainer-store'
 import { packTrainerDocument, readRecord, recordParts, recordUpdate } from './save-codec.js'
 
 type Phase = 'loading' | 'ready' | 'offline' | 'importing'
@@ -21,7 +21,6 @@ let active: StorageSession | undefined
 const accountError = 'Account storage is unavailable. You can train with temporary settings or reconnect your account.'
 const writeError = 'Changes are only in this session. Use Save settings again to retry.'
 const capacityError = 'The account library is full. Export a backup and remove older entries.'
-const summaryKeys = new Set(['preset', 'version', 'limit_mode', 'timer', 'parries', 'souls', 'second'])
 
 export function nativeStorageLoading(): boolean { return !active || active.phase === 'loading' || active.phase === 'importing' }
 export function nativeStorageUnavailableReason(): string {
@@ -153,6 +152,27 @@ export function nativeBackupAvailable(player: Player, writing: boolean): boolean
     (writing ? !store.sending : !unavailableLibrary())
 }
 
+/** backupProblem checks an import without changing settings or saved entries. */
+export function backupProblem(raw: string): string | undefined {
+  const data = parseTrainerDocument(raw)
+  if (!data) return 'This is not a valid trainer backup. Your library was kept.'
+  if (!makeParts(JSON.stringify(data))) return 'This backup exceeds account storage. Your library was kept.'
+}
+
+/** nativeLibraryStatus reports whether the owner can use or replace the library. */
+export function nativeLibraryStatus(): { ready: boolean; busy: boolean; message: string; retry: boolean } {
+  const store = active
+  if (nativeStorageLoading()) return { ready: false, busy: true, message: nativeStorageUnavailableReason(), retry: false }
+  const damaged = unavailableLibrary()
+  return {
+    ready: store?.phase === 'ready' && !damaged,
+    busy: Boolean(store?.sending),
+    message: store?.error ?? (damaged ? 'Saved entries unavailable. Import a backup to recover them.' :
+      store?.pendingSince !== undefined && Date.now() - store.pendingSince >= 450 ? 'Saving to your account…' : ''),
+    retry: !store?.sending && Boolean(store?.error && store.error !== capacityError),
+  }
+}
+
 // Check and persist the entire import before changing the visible library or
 // applying its settings. The caller holds session changes while this is pending.
 export function importNativeDocument(player: Player, raw: string, done: (message: string, ok: boolean) => void): void {
@@ -180,45 +200,4 @@ export function importNativeDocument(player: Player, raw: string, done: (message
     applyConfiguration(settings)
     done('Imported your trainer settings, drills and hero builds.', true)
   })
-}
-
-let cachedProfiles: ReturnType<typeof profiles> | undefined
-let catalog = '[]'
-function profileCatalog(): string {
-  const current = profiles()
-  if (current === cachedProfiles) return catalog
-  cachedProfiles = current
-  catalog = JSON.stringify(current.map(p => ({ id: String(p.id), name: p.name, hero: p.loadout?.hero || '',
-    inventory: !!p.loadout?.items, abilities: !!p.loadout?.abilities, settings: p.settings !== undefined,
-    items: p.loadout?.items?.length || 0, level: p.loadout?.abilities?.level || 0,
-    drill: p.settings?.split(',').filter(field => summaryKeys.has(field.split('=')[0])).join(',') || '' })))
-  return catalog
-}
-
-export function nativeScoreStorage(fields: Record<string, string | number>, includeProfiles: boolean): Record<string, string | number> {
-  const store = active, result = { ...fields }
-  delete result.ProfileAccount // The UI only needs its own rows.
-  if (nativeStorageLoading()) result.StorageLoading = 1
-  if (!store || store.phase === 'loading') {
-    result.StartUnavailable = nativeStorageUnavailableReason()
-    delete result.ProfileBusy
-    delete result.ProfileList
-    return result
-  }
-  if (store.phase === 'importing') result.StartUnavailable = nativeStorageUnavailableReason()
-  if (store.phase === 'offline') result.SettingsSaveError = 'offline'
-  else if (unavailableLibrary()) result.SettingsSaveError = 'damaged'
-  else if (store.error) result.SettingsSaveError = store.error === capacityError ? 'capacity' : 'write'
-  else if (store.phase === 'ready') result.SettingsSaveError = ''
-  if (store.error) result.SettingsSaveMessage = store.error
-  if (store.pendingSince !== undefined && Date.now() - store.pendingSince >= 450) result.SettingsSavePending = 1
-  if (!includeProfiles) return result
-  const offline = store.phase === 'offline'
-  result.ProfileList = !offline && !unavailableLibrary() ? profileCatalog() : ''
-  if (store.sending || store.phase === 'importing') {
-    result.ProfileBusy = 1
-    result.ProfileFeedback = store.phase === 'importing' ? 'Importing…' : 'Saving to your account…'
-  } else if (store.error) result.ProfileFeedback = store.error
-  if (offline) { result.ProfileBusy = 0; result.ProfileFeedback = '' }
-  return result
 }

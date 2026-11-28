@@ -48,6 +48,13 @@ const preset = createPresetSettings((key: string, value: boolean | number) => {
 // Only non-default choices need to be persisted.
 const choices = new Map<string, string>()
 
+/** trainerSetting reads the effective live value, including preset defaults. */
+export function trainerSetting(key: string): string | number | boolean {
+  if (key === 'preset') return preset.preset
+  if (isPresetSetting(key)) return preset.get(key)
+  return choices.get(key) ?? drillDefaults[key] ?? ''
+}
+
 export function settingsSnapshot(): string {
   return preset.snapshot().concat(savedDrillChoices(choices)).join(',')
 }

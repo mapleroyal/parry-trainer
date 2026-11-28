@@ -10,22 +10,19 @@ import sys
 import tempfile
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
-from build_native_menu import build_native_menu
 from quiet_melee import stage_quiet_melee
 from steam_ready import check_steam_ready, deadlock_dir, steam_roots
 
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "native"
 STATE = ROOT / ".runtime/hyperline"
-VERSION = "v0.1.112"
 
 
 def tool():
-    cli = os.environ.get("MODLOCK_CLI") or shutil.which("modlock") or STATE / ("modlock.exe" if os.name == "nt" else "modlock")
+    override = os.environ.get("MODLOCK_CLI")
+    cli = override or shutil.which("modlock") or STATE / ("modlock.exe" if os.name == "nt" else "modlock")
     if not Path(cli).is_file():
-        raise ValueError(f"Install the Modlock {VERSION} developer CLI on PATH, or set MODLOCK_CLI to its path.")
-    if subprocess.check_output([cli, "version"], text=True).strip().split()[-1] != VERSION:
-        raise ValueError(f"This version of Parry Trainer builds with Modlock {VERSION}. Set MODLOCK_CLI to that version.")
+        raise ValueError("Install Modlock v0.1.118 or later, or set MODLOCK_CLI to its modlock command line.")
     return cli
 
 
@@ -46,7 +43,6 @@ def stage(project, probe):
     shutil.copyfile(ROOT / "tsconfig.json", project / "tsconfig.json")
     shutil.copytree(NATIVE / "maps", project / "maps")
     shutil.copytree(NATIVE / "content", project / "content")
-    build_native_menu(ROOT, project / "content")
     entry = "import './native/main'\n"
     if probe:
         (project / "tests").mkdir()
@@ -81,16 +77,20 @@ def package(build, manifest):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", nargs="?", choices=("build", "verify", "play", "draft", "publish", "probe-build"), default="build")
-    parser.add_argument("probe", nargs="?", choices=sorted(p.stem for p in (ROOT / "tests").glob("*.ts")))
+    probes = sorted(p.stem for p in (ROOT / "tests").glob("*.ts"))
+    parser.add_argument("probe", nargs="?", choices=probes)
+    parser.add_argument("--probe", dest="play_probe", choices=probes, help="run an isolated diagnostic build with play")
     args = parser.parse_args()
     if (args.action == "probe-build") != bool(args.probe):
         parser.error("use probe-build with the name of one gameplay probe")
+    if args.play_probe and args.action != "play":
+        parser.error("--probe requires play")
     cli = tool()
     STATE.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, "MODLOCK_NO_UPDATE_CHECK": "1"}
     with tempfile.TemporaryDirectory(dir=STATE, prefix="stage-") as tmp:
         project = Path(tmp)
-        manifest = stage(project, args.probe)
+        manifest = stage(project, args.probe or args.play_probe)
         if args.action == "verify":
             # Run the same manifest, asset and module checks as a Hyperline upload,
             # with only a local destination. Discard the SDK's standalone wrapper.
@@ -104,11 +104,16 @@ def main():
         if args.action == "play":
             # A path named <project>/build stores local accounts inside that
             # source project. Use the normal installed-mod store across launches.
-            release = project / "release"
-            (project / "build").rename(release)
             override = env.get("DEADLOCK_DIR")
             check_steam_ready(Path(override) if override else deadlock_dir(steam_roots()))
-            subprocess.run([cli, "play", "--watch=false", release], env=env, check=True)
+            built = project / "build"
+            if not args.play_probe:
+                release = project / "release"
+                built.rename(release)
+                built = release
+            else:
+                env["MODLOCK_STATE"] = str(project / "state")
+            subprocess.run([cli, "play", "--watch=false", built], env=env, check=True)
         elif args.action == "probe-build":
             # A separate output per probe permits sequential or isolated parallel engine tests.
             out = STATE / "probes" / args.probe

@@ -10,9 +10,11 @@ Parry Trainer 0.4.4 is available for local play while Hyperline publication is p
 2. Close Deadlock and finish any queued Deadlock update in Steam Downloads. Leave Steam running. The local host and game share files, so applying a patch during practice can disconnect you.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
-To run from a source checkout, use `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
+The ZIP above is the last packaged build. To try the script-free source version, install [Modlock v0.1.118](https://github.com/paralin/modlock/releases/tag/v0.1.118) or later, which has the typed menu, document controls, layout bindings and multi-handle ranges. Then run `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
 
-## Screenshots
+## Release screenshots
+
+These show the packaged release above.
 
 ![Sinclair parries an incoming heavy melee with eight seconds left on the session timer.](docs/screenshots/timed-parry.webp)
 
@@ -32,15 +34,15 @@ To run from a source checkout, use `bin/hyperline play` on Linux or `py -3 bin/h
 
 ## Training
 
-You enter a quiet arena with a randomly selected hero. Press the scoreboard key (Tab by default) to open **Session**. Between sessions, press it again to close the menu. Choose your rules, then select **Begin session**. During the countdown and practice, hold the scoreboard key to open the menu and release it to aim. Escape also closes the menu, including while typing a save name. With the tab strip focused, Left and Right move between tabs.
+You enter a quiet arena with a randomly selected hero. Press the scoreboard key (Tab by default) to open **Session**. Between sessions, press it again to close the menu. Choose your rules, then select **Begin session**. During the countdown and practice, hold the scoreboard key to open the menu and release it to aim. Escape also closes the menu, including while typing a save name.
 
 The **Templates** tab, just before **Score**, offers built-in configurations. Move the slider from **Easiest** to **Hardest** to preview a template, then choose **Apply**. Use **Saved** for drills you create yourself. **My hero** controls cooldowns, stamina, health and leveling. **Opponents** controls the hidden attackers and their cues. **Creeps** controls lane troopers and neutral camps. To switch your own hero, use Deadlock’s **Escape → Swap Hero**, including during a session.
 
-The trainer remembers your options between launches. The orange **Reset** at the top right of every tab restores all trainer options to Normal, including random opponents and unlimited practice. Your equipped hero, purchases, saved entries and score are kept. Using Reset during practice lets you continue the same session with the default rules.
+The trainer remembers your options between launches. **Reset** at the bottom of the menu restores all trainer options to Normal, including random opponents and unlimited practice. Your equipped hero, purchases, saved entries and score are kept. Using Reset during practice lets you continue the same session with the default rules.
 
-In **Session**, choose **Unlimited**, a **Timer**, or **Goals**. Goals can require successful parries, souls, or both. A zero leaves that target out. Press Enter or leave a numeric field to accept the value. An incomplete time reverts to its last accepted duration. The top row shows elapsed time, parries, heavy hits taken, and souls secured or missed from each creep source. A timer replaces elapsed time with time remaining. The clock starts after the countdown and freezes at the result.
+In **Session**, choose **Unlimited**, a **Timer**, or **Goals**. Goals can require successful parries, souls, or both. A zero leaves that target out. Choose **Set** to accept an edited number, or **Begin session** to accept it and start. Duration accepts seconds or `m:ss`. The top row shows elapsed time, parries, heavy hits taken, and souls secured or missed from each creep source. A timer replaces elapsed time with time remaining. The clock starts after the countdown and freezes at the result.
 
-Survive the timer or reach all your goals to win. Reaching the heavy-hit limit or dying with **Lose on death** enabled ends the session in defeat. Both outcomes show Deadlock’s match result, screen wipe and matching music for under two seconds. The Score tab and final scorecard show bullet accuracy as both a percentage and hits out of pellets fired. Hits on troopers, neutrals and soul orbs count. Accuracy has no effect on the outcome. Modlock reports pellet contacts without individual projectile IDs, so overlapping piercing shots can give an approximate result. The final score stays open until you select **Close** or press Escape. Press the scoreboard key and open **Score** to revisit it. Ending a session manually also keeps its score there. Beginning another session clears the counters.
+Survive the timer or reach all your goals to win. Reaching the heavy-hit limit or dying with **Lose on death** enabled ends the session in defeat. Both outcomes show a brief result banner and play matching music before opening the scorecard. The Score tab and final scorecard show bullet accuracy as both a percentage and hits out of pellets fired. Hits on troopers, neutrals and soul orbs count. Accuracy has no effect on the outcome. Modlock reports pellet contacts without individual projectile IDs, so overlapping piercing shots can give an approximate result. The final score stays open until you select **Close** or press Escape. Press the scoreboard key and open **Score** to revisit it. Ending a session manually also keeps its score there. Beginning another session clears the counters.
 
 **Session → Soul penalties** has three independent switches. Each enabled event can deduct one collected soul from your training score.
 
@@ -60,7 +62,7 @@ Drills saved with the older single distance slider adopt the new bounds when the
 
 In **Saved → Hero builds**, choose **Save build** to save inventory, abilities, or both for your current hero. Inventory includes items, active slots and imbues. Abilities include upgrades, level and unspent points. **Load build** switches to the saved hero and restores the selected parts. While playing that hero, use **Overwrite** to update the build. You can also rename or delete it.
 
-In Hyperline, **Saved → Backups → Export backup** puts the settings, drills and builds into a text field. Copy its contents to a file such as `parry-trainer.json`. To restore or transfer it, paste the JSON into that field between sessions, choose **Import backup** and confirm. A complete, valid import replaces the account library and settings together.
+In Hyperline, **Saved → Backups → Export backup** puts the settings, drills and builds into a text field. Copy its contents to a file such as `parry-trainer.json`. To restore or transfer it, paste the JSON into the import field between sessions, choose **Review import** and confirm. A complete, valid import replaces the account library and settings together.
 
 Hyperline stores the library for the signed-in player. Let **Saving** finish before leaving if you want the latest changes to follow you. When account storage is offline you can still practice and change the session settings. The client reports storage errors and preserves the saved library. The account record fits up to 7,500 bytes of packed trainer data; capacity depends on the drills and hero builds. To move your saved drills from an earlier trainer installation, export there and import the JSON here.
 
@@ -71,12 +73,12 @@ Use **B** anywhere to buy or sell items with Sandbox funds and open the native b
 
 | Setting | Starts at | What it changes |
 | --- | --- | --- |
-| Melee start distance | 6.9–13.4 m, favoring 10.1 m | In **Opponents**, drag the two circles to set the limits and the vertical line to favor a distance. The thin floor rings use the Hideout’s distance markings. The numbers show meters, and the ring you’re adjusting turns amber. Between sessions, hold whichever key you assigned to **Extra Info** in Deadlock’s settings to see all three distances around your hero. Equal distances share a ring. Set both limits equal to drill one distance. You can also select a labeled value and use the arrow keys, including when handles overlap. |
-| Time between melees | 1–6 s, favoring 3.5 s | Each opponent rolls its own time between windups. In **Opponents**, set the shortest and longest waits with the circles and the favored wait with the vertical marker. Set the limits equal for a steady rhythm. |
+| Melee start distance | 6.9–13.4 m, favoring 10.1 m | In **Opponents**, adjust the minimum, favored and maximum values. Drag a handle to see its ring in the arena, or hold Extra Info between sessions to see all three. Equal distances share a ring. Set both limits equal to drill one distance. |
+| Time between melees | 1–6 s, favoring 3.5 s | Each opponent rolls its own time between windups. In **Opponents**, set the shortest, longest and favored waits. Set the limits equal for a steady rhythm. |
 | Ability cooldowns | Off | Uses the Sandbox cooldown cap. Turn on for the usual penalty after a missed parry. |
 | Fast stamina regen | On | Uses the built-in Sandbox setting. Turn off for normal stamina recovery. |
 | Opponent melee effects | Off | Show the opponent’s hand flash, lunge dust and sprint trails together. |
-| Parry effects and stun labels | Off | Show the orbiting star and sparks on parried opponents, and the “Stunned” label for all targets, including ability stuns. Your gold success flash appears at either setting. |
+| Parry effects and stun labels | Off | Show the orbiting star and sparks on parried opponents. The stock HUD still owns its stun labels and player feedback. |
 | Opponent 1 hero | Random | Open the list and click a hero to change whose melee you hear and practice against. |
 | Second opponent | Off | Enable an independently timed attacker. Its hero can be selected separately. |
 | Lose on death | Off | Turn on to end the session on any death, including a standing-still death. Leave it off to respawn at full health after about 1.5 seconds and continue the same session. The refill includes health from items. Movement, firing and standing-still damage resume when your hero returns to play. |
@@ -89,9 +91,9 @@ Use **B** anywhere to buy or sell items with Sandbox funds and open the native b
 
 ### Templates
 
-The default template is **Normal (50)**. Moving the slider previews the melee, hero, creep and session settings for another template and enables **Apply**. Returning to the active position keeps your current settings, including any custom adjustments. Leaving the tab or closing the menu also cancels a preview.
+The default template is **Normal (50)**. Moving the slider previews the melee, hero, creep and session settings for another template and enables **Apply**. Moving the slider does not change your current settings. The preview changes the drill only after you confirm **Apply template**.
 
-Applying a template replaces the trainer options, selects random opponents and sets the finish condition to Unlimited. Your equipped hero and saved drills are kept. **Begin session** appears on this tab once the change takes effect. To start with your existing settings, use **Begin session** on another tab.
+Applying a template replaces the trainer options, selects random opponents and sets the finish condition to Unlimited. Your equipped hero and saved drills are kept. Select **Begin session** to start with the settings currently in effect.
 
 Every template keeps the same maximum melee distance. **Easiest (0)** fixes every start at 13.4 m and shows the opponent’s lunge and stun effects. **Normal (50)** uses the far half of the range, from 6.9 to 13.4 m, and favors its midpoint at 10.1 m. Above Normal, both the minimum and favored distance move closer. Template 99 still leaves 2.4 m of separation. **Hardest (100)** opens the full 0.25–13.4 m range and favors point blank. About one in eight of its punches still starts beyond the halfway point.
 
@@ -107,7 +109,7 @@ The arena recenters you before you can reach its edges and carries your height, 
 
 ## Build the Hyperline release
 
-Install [Modlock v0.1.112](https://github.com/paralin/modlock/releases/tag/v0.1.112) and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
+Install Modlock v0.1.118 or later, which has typed menus, document controls, layout bindings and multi-handle ranges, and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
 
 ```sh
 bin/hyperline build
@@ -116,9 +118,9 @@ bin/hyperline verify
 
 The first command writes the mod-only ZIP in `dist/`. It includes the compiled gameplay, arena, menu and range markers. The second runs Modlock's publication checks against a temporary local archive. It can download the SDK's Windows CLI for that check. Neither command starts Deadlock or publishes the mod.
 
-`native/main.ts` starts the hosted mode. Combat, creep behavior, scoring and hero loadouts live in the top-level TypeScript modules. Score data and settings travel directly to the HUD through Modlock's player routes. Backup transfers use the layout's player-scoped actions. The map builds from authored entities, physics, world resources and navigation. Its sky and the range markers' textures resolve from the player's installed game.
+`native/main.ts` starts the hosted mode. Combat, creep behavior, scoring and hero loadouts live in the top-level TypeScript modules. `native/interface.ts` draws the menus with typed Modlock controls, and `native/score-view.ts` fills the authored HUD layouts in `native/content/` through layout bindings. Modlock owns client input and focus, and delivers a completed backup to the server for validation before the player confirms replacement. The map builds from authored entities, physics, world resources and navigation. Its sky and the range markers' textures resolve from the player's installed game.
 
-To run the HUD and gameplay-state tests with Node 24 or later, use `node --test tests/*.mjs menu/*.test.cjs`.
+To run the backup and gameplay-state tests with Node 24 or later, use `node --test tests/*.mjs`.
 
 For a dedicated-server check, `bin/hyperline probe-build cues` builds the stock-melee probe in `.runtime/hyperline/probes/cues`. Run the pinned CLI with `modlock play --no-game --watch=false .runtime/hyperline/probes/cues` and look for `PARRY TRAINER PROBE PASS`. The `quiet-melee` probe checks weapon selection and restoration across the playable roster. The `open-arena` probe checks the floor and long-range bullet travel. The `session`, `tracking`, `melee-distance`, `parried`, `respawn` and `hero` probes use the same workflow. Run these engine checks with the game closed.
 
@@ -131,6 +133,4 @@ cargo run --locked --manifest-path map-src/Cargo.toml --bin native-arena -- nati
 cargo run --locked --manifest-path map-src/Cargo.toml --bin range-markers -- native/content/particles
 ```
 
-The trainer uses scripted Panorama layouts for its menu, scorecard and HUD. Hyperline requires trusted-creator access to publish these layouts. [Modlock client content guide](https://paralin.github.io/modlock/guides/client-content)
-
-With that access, run `bin/hyperline publish` for a regular release or `bin/hyperline draft` for a tester prerelease. After Hyperline accepts the upload, follow the creator dashboard to play a one-player lobby and set the game Live. [Hyperline creator dashboard](https://hyperline.gg/creators) · [Publishing and tester drafts](https://paralin.github.io/modlock/reference/publishing)
+The source build ships no Panorama scripts. Its few layouts carry the game's own HUD styles, and the mod sets their named panels. It needs a runtime that supports the typed controls; the release ZIP above and installed Hyperline clients are separate from this source check.

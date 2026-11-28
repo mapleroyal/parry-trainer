@@ -1,0 +1,36 @@
+<root>
+  <styles>
+    <include src="s2r://panorama/styles/citadel_base_styles.vcss" />
+    <include src="file://{resources}/styles/{addon}/hud.css" />
+  </styles>
+  <Panel hittest="false" hittestchildren="false" style="width: 100%; height: 100%;">
+    <Panel id="ParryTrainerHud">
+      <Panel id="ParryTrainerHudStats">
+        <Panel class="PTHudColumn">
+          <Label id="ParryTrainerClockCaption" class="PTHudTitle" text="Time elapsed" />
+          <Label id="ParryTrainerClock" class="PTHudStat" text="0:00" />
+          <Label id="ParryTrainerHudRecovery" class="PTHudTitle" text="Respawning · session continues" visible="false" />
+        </Panel>
+        <Panel class="PTHudColumn">
+          <Label class="PTHudTitle" text="Parries" />
+          <Label id="ParryTrainerHudParries" class="PTHudStat" text="0/0 · 0 hits taken" />
+        </Panel>
+        <Panel class="PTHudColumn">
+          <Label class="PTHudTitle" text="Trooper souls" />
+          <Label id="ParryTrainerHudLaneSouls" class="PTHudStat" text="0 secured · 0 missed" />
+        </Panel>
+        <Panel class="PTHudColumn">
+          <Label class="PTHudTitle" text="Camp souls" />
+          <Label id="ParryTrainerHudCampSouls" class="PTHudStat" text="0 secured · 0 missed" />
+        </Panel>
+        <Panel id="ParryTrainerHudLimit" class="PTHudColumn" visible="false">
+          <Label id="ParryTrainerHudCaption" class="PTHudTitle" text="Training" />
+          <Panel class="PTHudHelp">
+            <CitadelBinding id="ParryTrainerHudKey" action="Scoreboard" show_single_bind="true" compact="true" />
+            <Label id="ParryTrainerHudText" class="PTHudStat" text="to begin" />
+          </Panel>
+        </Panel>
+      </Panel>
+    </Panel>
+  </Panel>
+</root>

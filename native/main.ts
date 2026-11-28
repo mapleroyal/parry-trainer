@@ -1,39 +1,37 @@
-import { hideHud, jsx, route, show } from 'modlock'
+import { hideHud, onFrame, show } from 'modlock'
 import { resetCharacterSession } from '../character'
 import { useDrainRoute } from '../drain-warning'
 import { activeTrainee, startGameplay } from '../gameplay'
-import { registerScore } from '../score'
-import { registerTrainerCommands } from '../trainer-commands'
-import { closeNativeStorage, nativeScoreStorage, nativeStorageLoading,
-  openNativeStorage, retryNativeSave } from './storage'
-import { nativeBackupAction, resetNativeBackup } from './backup'
+import { TrainerInterface } from './interface'
+import { closeNativeStorage, openNativeStorage } from './storage'
 
-useDrainRoute((player, visible) => route(player, 'draining', visible))
-registerTrainerCommands({ busy: nativeStorageLoading, retry: retryNativeSave, nativeBackup: true })
+let view: TrainerInterface | undefined
 
-registerScore((player, sequence, score, library) => {
-  const fields = nativeScoreStorage(score, library)
-  fields.ScoreSequence = Number(sequence)
-  route(player, 'score', fields)
+useDrainRoute((_, visible) => {
+  if (!view) return false
+  view.draining = visible
+  return true
 })
 
 startGameplay('stock', {
-  joined(connection) {
+  joined({ player }) {
     resetCharacterSession()
-    resetNativeBackup()
-    openNativeStorage(connection.player)
-    hideHud(connection.player, ['topBar', 'minimap', 'brokerCountdown', 'levelUp'])
-    show(connection.player, jsx('layout', {
-      src: 'trainer.xml',
-      style: { width: '100%', height: '100%' },
-      onAction(player, action, payload) {
-        if (action === 'backup' && activeTrainee()?.slot === player.slot) nativeBackupAction(player, payload)
-      },
-    }))
+    openNativeStorage(player)
+    view = new TrainerInterface(player)
+    view.update(true)
   },
-  left() {
+  left({ player }) {
+    show(player, null)
+    hideHud(player, [])
+    view = undefined
     resetCharacterSession()
-    resetNativeBackup()
     closeNativeStorage()
   },
 })
+
+onFrame(() => {
+  if (view?.player === activeTrainee()) view?.update()
+})
+
+/** currentInterface gives the local probe the same interface players use. */
+export const currentInterface = () => view
