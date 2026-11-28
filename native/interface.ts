@@ -1,9 +1,9 @@
-import { heroes, jsx, show, type Child, type DocumentFailure, type Player } from 'modlock'
+import { followAction, heroes, hideHud, jsx, show, type ActionPhase, type Child, type DocumentFailure, type HudPart, type Player } from 'modlock'
 import { characterAction, characterChanging, characterFields } from '../character'
 import { beginTraining, simulationTime, stopTraining, waveSettings } from '../gameplay'
 import { presetValues } from '../difficulty-settings.js'
 import { meleeRange } from '../melee-range.js'
-import { setRangePreview } from '../range-preview'
+import { clearRangePreview, setRangePreview } from '../range-preview'
 import { handleResultAudio } from '../result-audio'
 import { scoreFields } from '../score-snapshot'
 import { parseLimit, session } from '../session'
@@ -23,6 +23,10 @@ const menuStyle = { width: 850, horizontalAlign: 'center', verticalAlign: 'cente
 const plate = { width: '100%', background: palette.plate, borderColor: palette.border,
   borderWidth: 1, borderRadius: 6, padding: 20 } as const
 const half = { width: 392, margin: [0, 12, 0, 0] } as const
+// The trainer's arena has no top bar, minimap or Broker, and plays its own level.
+const hiddenHud: HudPart[] = ['topBar', 'minimap', 'brokerCountdown', 'levelUp']
+// A range's handles are the min, favored and max settings, in that order.
+const rangeHandles = ['min', 'favored', 'max'] as const
 
 /** TrainerInterface projects one trainee's live practice and library into typed nodes. */
 /** importFailure says why a pasted backup did not arrive; a cancel needs no message. */
@@ -53,11 +57,25 @@ export class TrainerInterface {
   private drawn = ''
   private redraw = 0
   private previewRequest = 0
+  private hud = ''
+  /** rings is the melee ring the player is looking at: one held handle, every ring, or none. */
+  private rings?: typeof rangeHandles[number] | 'inspect'
 
   readonly player: Player
 
   constructor(player: Player) {
     this.player = player
+    // Holding Extra Info between sessions shows the melee distance rings.
+    followAction(player, 'extraInfo', (_, phase) => this.showRings('inspect', phase))
+  }
+
+  /** showRings follows one hold that shows the melee rings, until it ends. */
+  private showRings(rings: typeof rangeHandles[number] | 'inspect', phase: ActionPhase): void {
+    if (phase === 'pressed') this.rings = rings
+    else if (this.rings === rings) {
+      this.rings = undefined
+      clearRangePreview()
+    }
   }
 
   /** update reads the clock and scores after gameplay and redraws only on a visible change. */
@@ -65,6 +83,9 @@ export class TrainerInterface {
     const now = simulationTime()
     if (!force && now < this.next) return
     this.next = now + 0.1
+    // A held preview refreshes its rings, which clear themselves if the holds end unseen.
+    if (this.rings) setRangePreview(`${this.rings} ${trainerSetting('melee_min')} ${trainerSetting('melee_max')} ${trainerSetting('melee_bias')}`, now)
+    this.hideHud()
     const score = scoreFields(session, soulStats(), now, '')
     const storage = nativeLibraryStatus()
     const hero = this.player.pawn()
@@ -83,7 +104,26 @@ export class TrainerInterface {
       this.draining, this.redraw, banner, this.recap])
     if (!force && key === this.drawn) return
     this.drawn = key
-    show(this.player, [arenaHud(score, this.draining, banner), this.settingsMenu(storage), this.recapMenu(score)])
+    show(this.player, [arenaHud(score, {
+      draining: this.draining, banner, dead: !hero?.health,
+      timer: trainerSetting('limit_mode') === 'timer' ? Number(trainerSetting('timer')) : 0,
+      penalties: ['penalty_hit', 'penalty_unparried', 'penalty_whiff'].some(key => Boolean(trainerSetting(key))),
+    }), this.settingsMenu(storage), this.recapMenu(score)])
+  }
+
+  /**
+   * hideHud hides the stock HUD the arena replaces: the stun labels over
+   * opponents unless their stun effects are on, and the game's own cast-failed
+   * notice while the drain warning takes its place.
+   */
+  private hideHud(): void {
+    const parts = [...hiddenHud]
+    if (!trainerSetting('parried')) parts.push('statusIndicators')
+    if (this.draining) parts.push('castFailed')
+    const key = parts.join()
+    if (key === this.hud) return
+    this.hud = key
+    hideHud(this.player, parts)
   }
 
   private refresh(): void {
@@ -228,12 +268,37 @@ export class TrainerInterface {
     }, key)], { margin: [4, 0] }, key)
   }
 
+  /**
+   * range draws a minimum, favored and maximum setting as one track with three
+   * handles. The favored setting is stored as its place between the bounds.
+   */
   private range(prefix: 'melee' | 'interval', format: (v: number) => string): Child[] {
     const min = Number(trainerSetting(`${prefix}_min`)), max = Number(trainerSetting(`${prefix}_max`))
     const bias = Number(trainerSetting(`${prefix}_bias`))
-    return [this.slider(`${prefix}_min`, 'Minimum', 0, max, format(min)),
-      this.slider(`${prefix}_bias`, 'Favored', 0, 100, format(meleeRange.favored(min, max, bias))),
-      this.slider(`${prefix}_max`, 'Maximum', min, 100, format(max))]
+    const favored = meleeRange.favored(min, max, bias)
+    const values = [min, favored, max]
+    return [jsx('range', {
+      handles: rangeHandles.map((name, index) => ({ name, value: values[index] })), min: 0, max: 100, step: 1,
+      disabled: this.locked, style: { width: '100%', height: 34, margin: [4, 0] },
+      onChange: (_: Player, [low, middle, high]: number[]) => this.changeRange(prefix, low, middle, high),
+      onHold: prefix === 'melee' ? (_: Player, handle: string, phase: ActionPhase) => {
+        const ring = rangeHandles.find(name => name === handle)
+        if (ring) this.showRings(ring, phase)
+      } : undefined,
+    }, `${prefix}-range`), row(rangeHandles.map((name, index) => column([note(['Minimum', 'Favored', 'Maximum'][index]),
+      text(format(values[index]), { color: palette.green, fontSize: 17 })], { width: '33%' }, name)), {}, `${prefix}-values`)]
+  }
+
+  /** changeRange stores a range's three handles, moving the bound that makes room first. */
+  private changeRange(prefix: 'melee' | 'interval', low: number, middle: number, high: number): void {
+    if (this.locked) return
+    const bounds: [string, number][] = [[`${prefix}_min`, low], [`${prefix}_max`, high]]
+    // A setting's bounds clamp to each other, so a range moved past the old maximum sets it first.
+    if (low > Number(trainerSetting(`${prefix}_max`))) bounds.reverse()
+    const stored = bounds.every(([key, value]) => changeSetting(key, String(Math.round(value))))
+    if (stored && high > low) changeSetting(`${prefix}_bias`, String(Math.round((middle - low) * 100 / (high - low))))
+    this.message = stored ? '' : 'That setting cannot change right now.'
+    this.refresh()
   }
 
   private opponents(): Child {
@@ -242,7 +307,7 @@ export class TrainerInterface {
       heading('Melee cues'), this.toggle('effects', 'Lunge trail and hand flash'),
       this.toggle('parried', 'Show opponent stun effects')], half),
     column([heading('Melee distance'), ...this.range('melee', value => meleeRange.formatUnits(meleeRange.units(value))),
-      button('Show range rings', () => setRangePreview(`inspect ${trainerSetting('melee_min')} ${trainerSetting('melee_max')} ${trainerSetting('melee_bias')}`, simulationTime()), { disabled: this.active }),
+      note('Hold Extra Info, or drag a handle, to see the distance rings.'),
       heading('Time between attacks'), ...this.range('interval', meleeRange.formatSeconds)], half),
     ], { verticalAlign: 'top' })
   }
@@ -377,7 +442,8 @@ export class TrainerInterface {
   private recapMenu(score: ReturnType<typeof scoreFields>): Child {
     if (!this.recap || session.phase !== 'finished' || session.reason === 'stopped' || this.recap !== session.runId) return null
     return jsx('menu', { mode: 'manual', openRequest: this.recap, style: menuStyle,
-      children: column([scorecard(score), row([note('Open Score to see this recap again.'), closeButton()], { horizontalAlign: 'right' })], plate),
+      children: column([scorecard(score), row([jsx('layout', { src: 'key.xml', style: { margin: [0, 12, 0, 0] } }, 'key'),
+        closeButton()], { horizontalAlign: 'right' })], plate),
     }, 'trainer-recap')
   }
 

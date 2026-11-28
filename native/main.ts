@@ -17,7 +17,6 @@ startGameplay('stock', {
   joined({ player }) {
     resetCharacterSession()
     openNativeStorage(player)
-    hideHud(player, ['topBar', 'minimap', 'brokerCountdown', 'levelUp'])
     view = new TrainerInterface(player)
     view.update(true)
   },

@@ -22,7 +22,7 @@ def tool():
     override = os.environ.get("MODLOCK_CLI")
     cli = override or shutil.which("modlock") or STATE / ("modlock.exe" if os.name == "nt" else "modlock")
     if not Path(cli).is_file():
-        raise ValueError("Install Modlock v0.1.116 or later, or set MODLOCK_CLI to its modlock command line.")
+        raise ValueError("Install Modlock v0.1.118 or later, or set MODLOCK_CLI to its modlock command line.")
     return cli
 
 
@@ -63,7 +63,7 @@ def package(build, manifest):
         packed = Path(tmp) / target.name
         with ZipFile(packed, "w") as archive:
             files = [build / "mod.json", build / "mod.js", build / "maps" / f"{manifest['map']}.vpk"]
-            for kind in ("particles", "materials", "models", "data"):
+            for kind in ("panorama", "particles", "materials", "models", "data"):
                 files.extend((build / kind).rglob("*"))
             for path in sorted(files):
                 if path.is_file():

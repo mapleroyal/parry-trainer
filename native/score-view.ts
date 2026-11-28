@@ -6,25 +6,89 @@ import { clock, column, heading, note, palette, row, text } from './ui'
 type Score = ReturnType<typeof scoreFields>
 const number = (score: Score, key: string) => Number(score[key] ?? 0)
 const pct = (hit: number, total: number) => total ? `${Math.round(100 * hit / total)}%` : '—'
-const bannerStyle: Style = { horizontalAlign: 'center', verticalAlign: 'center', fontSize: 54,
-  bold: true, background: palette.plate, padding: [12, 34], borderRadius: 7 }
+const layer: Style = { width: '100%', height: '100%' }
 
-/** arenaHud displays only the counters and feedback the player needs during a drill. */
-export function arenaHud(score: Score, draining: boolean, banner: boolean): Child {
+/** ArenaState is what the arena layers show besides the score itself. */
+export interface ArenaState {
+  /** draining is whether the stationary drain is hurting the trainee. */
+  draining: boolean
+  /** banner is whether the victory or defeat wipe is up. */
+  banner: boolean
+  /** dead is whether the trainee's hero is down. */
+  dead: boolean
+  /** timer is the timer the player has set, or 0 without one, for the clock before a run. */
+  timer: number
+  /** penalties is whether any soul penalty is on. */
+  penalties: boolean
+}
+
+/** goalProgress names each goal of a goal run with its progress. */
+function goalProgress(score: Score): string {
+  const parts: string[] = []
+  const goal = number(score, 'SessionGoal'), souls = number(score, 'SessionSoulGoal')
+  if (goal) parts.push(`${score.SessionParries}/${goal} ${goal === 1 ? 'parry' : 'parries'}`)
+  if (souls) parts.push(`${score.SessionSouls}/${souls} ${souls === 1 ? 'soul' : 'souls'}`)
+  return parts.join('  ·  ')
+}
+
+/** hudCall returns the bar's last column: its caption and call to action, or none. */
+function hudCall(score: Score, state: ArenaState): { caption: string; text: string; key: boolean } | undefined {
+  const phase = score.SessionPhase, goal = score.SessionMode === 'goal'
+  if (phase === 'ready') return { caption: 'Training', text: 'to begin', key: true }
+  if (phase === 'finished') {
+    const failed: Record<string, string> = { death: 'Failed · You died', hits: 'Failed · Hit limit reached' }
+    const why: Record<string, string> = { time: 'Time up', goal: 'Goal reached', stopped: 'Training ended' }
+    const reason = String(score.SessionEndReason)
+    return { caption: failed[reason] ?? why[reason] ?? 'Training complete', text: goal ? goalProgress(score) : 'to train again', key: !goal }
+  }
+  if (goal) return { caption: number(score, 'SessionGoal') && number(score, 'SessionSoulGoal') ? 'Goals' : 'Goal', text: goalProgress(score), key: false }
+  if (phase === 'running' && state.penalties) return { caption: 'Net souls secured', text: String(score.SessionSouls), key: false }
+  return undefined
+}
+
+/**
+ * arenaHud draws the stat bar, the countdown, the result wipe and the drain
+ * warning from the trainer's own layouts, which keep the game's fonts, art and
+ * animations; the mod only sets their named panels.
+ */
+export function arenaHud(score: Score, state: ArenaState): Child {
   const phase = score.SessionPhase
   const count = (key: string) => number(score, key)
-  const stat = (label: string, value: string) => column([note(label), text(value, { bold: true, fontSize: 20 })], { margin: [0, 13] }, label)
-  return jsx('panel', { style: { width: '100%', height: '100%' }, children: [
-    phase === 'ready' && text('Tab · Parry Trainer', { horizontalAlign: 'center', y: 18, color: palette.quiet, fontSize: 16 }),
-    phase === 'countdown' && text(`${count('SessionRemaining') || 'GO'}`, bannerStyle),
-    phase === 'running' && row([
-      stat(score.SessionMode === 'timer' ? 'Time left' : 'Elapsed', clock(count(score.SessionMode === 'timer' ? 'SessionRemaining' : 'SessionElapsed'))),
-      stat('Parries', `${score.SessionParries}/${score.SessionHeavies} · ${score.SessionHits} hit`),
-      stat('Trooper souls', `${score.LaneSecured} secured · ${score.LaneMissed} missed`),
-      stat('Camp souls', `${score.CampSecured} secured · ${score.CampMissed} missed`),
-    ], { horizontalAlign: 'center', y: 18 }),
-    draining && text('Move to stop the health drain', { horizontalAlign: 'center', verticalAlign: 'center', y: 85, color: palette.red, bold: true }),
-    banner && text(outcome(score), { ...bannerStyle, color: outcome(score) === 'Victory' ? palette.green : palette.red }),
+  // Before a run the clock shows the timer the player set; after it, the run's own.
+  const timed = phase === 'ready' ? state.timer > 0 : score.SessionMode === 'timer'
+  const seconds = phase === 'ready' ? state.timer : phase === 'countdown' ? (timed ? count('SessionTimerTarget') : 0)
+    : timed ? count('SessionRemaining') : count('SessionElapsed')
+  const recovering = phase === 'running' && state.dead && (count('SessionRespawnMs') > 0 || !count('SessionFailOnDeath'))
+  const call = hudCall(score, state)
+  const souls = (secured: string, missed: string) => `${score[secured]} secured · ${score[missed]} missed`
+  const digit = phase === 'countdown' ? Math.min(3, count('SessionRemaining')) : 0
+  const won = ['time', 'goal'].includes(String(score.SessionEndReason))
+  return jsx('panel', { style: layer, children: [
+    jsx('layout', { src: 'hud.xml', style: layer, bindings: {
+      ParryTrainerClockCaption: { text: timed ? 'Time left' : 'Time elapsed' },
+      ParryTrainerClock: { text: clock(seconds) },
+      ParryTrainerHudRecovery: { visible: recovering },
+      ParryTrainerHudParries: { text: `${score.SessionParries}/${score.SessionHeavies} · ${score.SessionHits} hits taken` },
+      ParryTrainerHudLaneSouls: { text: souls('LaneSecured', 'LaneMissed') },
+      ParryTrainerHudCampSouls: { text: souls('CampSecured', 'CampMissed') },
+      ParryTrainerHudLimit: { visible: Boolean(call) },
+      ParryTrainerHudCaption: { text: call?.caption ?? '' },
+      ParryTrainerHudKey: { visible: Boolean(call?.key) },
+      ParryTrainerHudText: { text: call?.text ?? '' },
+    } }, 'hud'),
+    // A new layout for each digit starts the game's shrinking animation again.
+    digit > 0 && jsx('layout', { src: 'countdown.xml', style: layer, bindings: {
+      PausedCountdownLabel: { text: String(digit), class: 'ShrinkCountdown' },
+    } }, `countdown-${digit}`),
+    state.banner && jsx('layout', { src: 'result.xml', style: layer, bindings: {
+      // The trainee plays on Amber, and the game colors its wipe by the winning team.
+      ParryTrainerResultVisual: { class: won ? 'MatchFinished Team1Victory' : 'MatchFinished Team2Victory' },
+      ParryTrainerVictoryLabel: { visible: won },
+      ParryTrainerDefeatLabel: { visible: !won },
+    } }, `result-${score.SessionRun}`),
+    jsx('layout', { src: 'drain.xml', style: layer, bindings: {
+      cast_failed_box: { class: state.draining ? 'cast_failed' : '' },
+    } }, 'drain'),
   ] }, 'arena-hud')
 }
 

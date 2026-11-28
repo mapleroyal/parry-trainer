@@ -10,7 +10,7 @@ Parry Trainer 0.4.4 is available for local play while Hyperline publication is p
 2. Close Deadlock and finish any queued Deadlock update in Steam Downloads. Leave Steam running. The local host and game share files, so applying a patch during practice can disconnect you.
 3. Run `modlock play --watch=false "<extracted folder>"`. Choose the folder containing `mod.json`.
 
-The ZIP above is the last packaged build. To try the script-free source version, install [Modlock v0.1.116](https://github.com/paralin/modlock/releases/tag/v0.1.116) or later, which has the typed menu and document controls. Then run `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
+The ZIP above is the last packaged build. To try the script-free source version, install [Modlock v0.1.118](https://github.com/paralin/modlock/releases/tag/v0.1.118) or later, which has the typed menu, document controls, layout bindings and multi-handle ranges. Then run `bin/hyperline play` on Linux or `py -3 bin/hyperline play` on Windows. Quit Deadlock when finished, then press Ctrl+C in the terminal if the host is still running. Audio uses your game volume.
 
 ## Release screenshots
 
@@ -73,7 +73,7 @@ Use **B** anywhere to buy or sell items with Sandbox funds and open the native b
 
 | Setting | Starts at | What it changes |
 | --- | --- | --- |
-| Melee start distance | 6.9–13.4 m, favoring 10.1 m | In **Opponents**, adjust the minimum, favored and maximum values. Between sessions, choose **Show range rings** to see the distances in the arena. Equal distances share a ring. Set both limits equal to drill one distance. |
+| Melee start distance | 6.9–13.4 m, favoring 10.1 m | In **Opponents**, adjust the minimum, favored and maximum values. Drag a handle to see its ring in the arena, or hold Extra Info between sessions to see all three. Equal distances share a ring. Set both limits equal to drill one distance. |
 | Time between melees | 1–6 s, favoring 3.5 s | Each opponent rolls its own time between windups. In **Opponents**, set the shortest, longest and favored waits. Set the limits equal for a steady rhythm. |
 | Ability cooldowns | Off | Uses the Sandbox cooldown cap. Turn on for the usual penalty after a missed parry. |
 | Fast stamina regen | On | Uses the built-in Sandbox setting. Turn off for normal stamina recovery. |
@@ -109,7 +109,7 @@ The arena recenters you before you can reach its edges and carries your height, 
 
 ## Build the Hyperline release
 
-Install Modlock v0.1.116 or later, which has typed menus and document controls, and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
+Install Modlock v0.1.118 or later, which has typed menus, document controls, layout bindings and multi-handle ranges, and Python 3.11 or later on the development machine. Put `modlock` on PATH or point `MODLOCK_CLI` at the executable. From a prepared checkout, the script can also use the pinned CLI at `.runtime/hyperline/modlock`.
 
 ```sh
 bin/hyperline build
@@ -118,7 +118,7 @@ bin/hyperline verify
 
 The first command writes the mod-only ZIP in `dist/`. It includes the compiled gameplay, arena, menu and range markers. The second runs Modlock's publication checks against a temporary local archive. It can download the SDK's Windows CLI for that check. Neither command starts Deadlock or publishes the mod.
 
-`native/main.ts` starts the hosted mode. Combat, creep behavior, scoring and hero loadouts live in the top-level TypeScript modules. `native/interface.ts` draws the trainer with typed Modlock controls. Modlock owns client input and focus, and delivers a completed backup to the server for validation before the player confirms replacement. The map builds from authored entities, physics, world resources and navigation. Its sky and the range markers' textures resolve from the player's installed game.
+`native/main.ts` starts the hosted mode. Combat, creep behavior, scoring and hero loadouts live in the top-level TypeScript modules. `native/interface.ts` draws the menus with typed Modlock controls, and `native/score-view.ts` fills the authored HUD layouts in `native/content/` through layout bindings. Modlock owns client input and focus, and delivers a completed backup to the server for validation before the player confirms replacement. The map builds from authored entities, physics, world resources and navigation. Its sky and the range markers' textures resolve from the player's installed game.
 
 To run the backup and gameplay-state tests with Node 24 or later, use `node --test tests/*.mjs`.
 
@@ -133,4 +133,4 @@ cargo run --locked --manifest-path map-src/Cargo.toml --bin native-arena -- nati
 cargo run --locked --manifest-path map-src/Cargo.toml --bin range-markers -- native/content/particles
 ```
 
-The source build does not ship Panorama scripts or layout files. It needs a runtime that supports the typed controls; the release ZIP above and installed Hyperline clients are separate from this source check.
+The source build ships no Panorama scripts. Its few layouts carry the game's own HUD styles, and the mod sets their named panels. It needs a runtime that supports the typed controls; the release ZIP above and installed Hyperline clients are separate from this source check.

@@ -1,0 +1,11 @@
+<root>
+  <styles>
+    <include src="s2r://panorama/styles/citadel_base_styles.vcss" />
+    <include src="file://{resources}/styles/{addon}/hud.css" />
+  </styles>
+  <Panel class="PTKeyHint" hittest="false">
+    <Label id="ParryTrainerKeyBefore" class="PTKeyText" text="Press" />
+    <CitadelBinding class="PTKeyText" action="Scoreboard" show_single_bind="true" compact="true" />
+    <Label id="ParryTrainerKeyAfter" class="PTKeyText" text="and open Score to see these results again." />
+  </Panel>
+</root>

@@ -62,6 +62,8 @@ function backupsView() {
   const node = (kind, props = {}) => ({ kind, ...props })
   const api = vm.createContext({
     heroes: [], jsx: node, show(_, children) { tree = children }, simulationTime: () => 0,
+    followAction: () => true, hideHud: () => true, trainerSetting: () => 0,
+    setRangePreview() {}, clearRangePreview() {},
     session: { phase: 'ready' }, soulStats: () => ({}), scoreFields: () => ({}),
     settingsSnapshot: () => reference.settings, characterFields: () => ({}),
     characterChanging: () => false, nativeStorageLoading: () => false,
